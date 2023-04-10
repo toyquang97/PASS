@@ -6,7 +6,7 @@
 extern inputBoard_t input;
 extern outputBoard_t output;
 extern sensor_t sensor;
-extern tickTimer timer;
+extern tickTimer gFlagTimer;
 
 extern char rxBufferHMI[MAX_LENGTH];
 extern char preRxBufferHMI[MAX_LENGTH];
@@ -52,11 +52,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim->Instance == htim5.Instance) // 100ms
   {
-    timer.Time_100ms = 1;
+    gFlagTimer.Time_100ms = 1;
   }
   else if (htim->Instance == htim6.Instance) //5ms
   {
-    timer.Time_5ms = 1;
+    gFlagTimer.Time_5ms = 1;
     if ((count % 2) == 0)
     {
       gFlagTimer.Time_10ms = 1;
@@ -68,6 +68,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
   else if (htim->Instance == htim6.Instance) // 1s
   {
-    timer.Time_1000ms = 1;
+    gFlagTimer.Time_1000ms = 1;
   }
 }

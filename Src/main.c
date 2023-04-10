@@ -63,7 +63,7 @@ extern bool isMaster;
 inputBoard_t input;
 outputBoard_t output;
 sensor_t sensor;
-tickTimer timer;
+tickTimer gFlagTimer;
 
 /* USER CODE END 0 */
 

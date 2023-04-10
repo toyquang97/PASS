@@ -6,6 +6,7 @@
 "passthr\usart.o"
 "passthr\stm32f1xx_it.o"
 "passthr\stm32f1xx_hal_msp.o"
+"passthr\interrput.o"
 "passthr\stm32f1xx_hal_gpio_ex.o"
 "passthr\stm32f1xx_hal_tim.o"
 "passthr\stm32f1xx_hal_tim_ex.o"
