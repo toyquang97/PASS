@@ -58,6 +58,60 @@ enum __TYPE_
   MH,
   MAX_TYPE,
 };
+enum __RELAY_
+{
+  RELAY1 = 1,
+  RELAY2,
+  RELAY3,
+  RELAY4,
+  RELAY_MAX,
+};
+
+enum __INPUTMANUAL_
+{
+  IN1 = 1,
+  IN2,
+  IN3,
+  IN4,
+  IN5,
+  IN6,
+  IN7,
+  IN8,
+  IN9,
+  IN10,
+  IN11,
+  IN12,
+  IN13,
+  IN14,
+  IN15,
+  IN16,
+  IN17,
+  IN18,
+  IN_MAX,
+};
+
+enum __OUTPUTMANUAL_
+{
+  OUT1 = 1,
+  OUT2,
+  OUT3,
+  OUT4,
+  OUT5,
+  OUT6,
+  OUT7,
+  OUT8,
+  OUT9,
+  OUT10,
+  OUT11,
+  OUT12,
+  OUT13,
+  OUT14,
+  OUT15,
+  OUT16,
+  OUT17,
+  OUT18,
+  OUT_MAX,
+};
 
 typedef struct __DATA_
 {
@@ -106,7 +160,7 @@ void MX_USART3_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 void uartHandlerVar(void);
-
+void getManualStatusIO(void);
 
 //const char *Click = "Click=";
 /* USER CODE END Prototypes */

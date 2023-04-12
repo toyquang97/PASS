@@ -46,7 +46,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+extern void readAllInput(sensor_t *pSensor, inputBoard_t *pInput);
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -102,6 +102,10 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
+  memset(&input,  0, sizeof(input));
+  memset(&output, 0, sizeof(output));
+  memset(&sensor, 0, sizeof(sensor));
+
 	HAL_UART_Receive_IT(&huart2, &rxData, 1);
 	// HAL_UART_Receive_IT(&huart2, buffer, 1);
 	// HAL_UART_Receive_IT(&huart3, buffer, 1);
@@ -119,10 +123,16 @@ int main(void)
     /* USER CODE BEGIN 3 */
     if(gFlagTimer.Time_5ms)
     {
+      getManualStatusIO();
       gFlagTimer.Time_5ms = 0;
     }
     if(gFlagTimer.Time_10ms)
     {
+      readAllInput(&sensor, &input);
+#if KEEP_DEBUG
+      memset(&sensor, 1, sizeof(sensor));
+      memset(&input, 1, sizeof(input));
+#endif
       gFlagTimer.Time_10ms = 0;
     }
     if(gFlagTimer.Time_50ms)

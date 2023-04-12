@@ -26,8 +26,12 @@ char preRxBufferHMI[MAX_LENGTH];
 uint8_t rxData = 0;
 uint8_t countRxByte = 0;
 bool isManualMode = 0;
-uint8_t instrumentType = MAX_TYPE;
+uint8_t instrumentType = BLACKBELT_PRO_IO_A_ONLY;
 bool isMaster = 0;
+ioRegister_t rxIOdata;
+bool rxInputManual[IN_MAX]={0};
+bool rxOutputManual[OUT_MAX]={0};
+bool rxRelayManual[RELAY_MAX]={0};
 char *click = "Click=";
 char type[10]  = "Type=";
 /* USER CODE END 0 */
@@ -259,9 +263,65 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 
 /* USER CODE BEGIN 1 */
 
+void getManualStatusIO(void)
+{
+  char temp[30];
+  if (isManualMode)
+  {
+    for (int i = 1; i <= IN_MAX; i++)
+    {
+      sprintf(temp,"IN%d=%d%c",i, 1,'\r');
+      if (!strcmp(rxBufferHMI, temp))
+      {
+        rxInputManual[i] = 1;
+      }
+      else
+      {
+        sprintf(temp,"IN%d=%d%c",i, 0,'\r');
+        if (!strcmp(rxBufferHMI, temp))
+        {
+          rxInputManual[i] = 0;
+        }
+      }
+    }
+    for (int i = 1; i <= OUT_MAX; i++)
+    {
+      sprintf(temp,"OUT%d=%d%c",i, 1,'\r');
+      if (!strcmp(rxBufferHMI, temp))
+      {
+        rxOutputManual[i] = 1;
+      }
+      else
+      {
+        sprintf(temp,"OUT%d=%d%c",i, 0,'\r');
+        if (!strcmp(rxBufferHMI, temp))
+        {
+          rxOutputManual[i] = 0;
+        }
+      }
+    }
+    for (int i = 1; i <= RELAY_MAX; i++)
+    {
+      sprintf(temp,"REL%d=%d%c",i, 1,'\r');
+      if (!strcmp(rxBufferHMI, temp))
+      {
+        rxRelayManual[i] = 1;
+      }
+      else
+      {
+        sprintf(temp,"REL%d=%d%c",i, 0,'\r');
+        if (!strcmp(rxBufferHMI, temp))
+        {
+          rxRelayManual[i] = 0;
+        }
+      }
+    }
+  }
+}
+
 void uartHandlerVar(void)
 {
-  char *temp = NULL;
+  char temp[30];
   if (!strcmp(rxBufferHMI, "Click=1\r"))
   {
     isManualMode = 0;
@@ -278,19 +338,7 @@ void uartHandlerVar(void)
     {
       instrumentType = i;
     }
-  }
-  if (isManualMode)
-  {
-    for (int i = 0; i < 18; i++)
-    {
-      //sprintf(temp,"IN%d=%d%c",i, '\r');
-      if (!strcmp(rxBufferHMI, temp))
-      {
-        //instrumentType = i;
-      }
-    }
-  }
-  
+  }  
 }
 
 /* USER CODE END 1 */

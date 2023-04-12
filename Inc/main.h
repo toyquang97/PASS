@@ -63,6 +63,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define SS8_Pin GPIO_PIN_13
+#define SS8_GPIO_Port GPIOC
 #define LED1_Pin GPIO_PIN_0
 #define LED1_GPIO_Port GPIOA
 #define LED2_Pin GPIO_PIN_1
@@ -125,10 +127,10 @@ void Error_Handler(void);
 #define SS4_GPIO_Port GPIOB
 #define SS5_Pin GPIO_PIN_5
 #define SS5_GPIO_Port GPIOB
-#define SS7_Pin GPIO_PIN_8
+#define SS6_Pin GPIO_PIN_8
+#define SS6_GPIO_Port GPIOB
+#define SS7_Pin GPIO_PIN_9
 #define SS7_GPIO_Port GPIOB
-#define SS8_Pin GPIO_PIN_9
-#define SS8_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 typedef struct __INPUT_
 {

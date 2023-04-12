@@ -20,7 +20,31 @@
 /* Includes ------------------------------------------------------------------*/
 #include "gpio.h"
 /* USER CODE BEGIN 0 */
+#include "main.h"
 
+void readAllInput(sensor_t *pSensor, inputBoard_t *pInput)
+{
+#if (KEEP_DEBUG == 0)
+  pSensor->SS1 = HAL_GPIO_ReadPin(SS1_GPIO_Port, SS1_Pin);
+  pSensor->SS2 = HAL_GPIO_ReadPin(SS2_GPIO_Port, SS2_Pin);
+  pSensor->SS3 = HAL_GPIO_ReadPin(SS3_GPIO_Port, SS3_Pin);
+  pSensor->SS4 = HAL_GPIO_ReadPin(SS4_GPIO_Port, SS4_Pin);
+  pSensor->SS5 = HAL_GPIO_ReadPin(SS5_GPIO_Port, SS5_Pin);
+  pSensor->SS6 = HAL_GPIO_ReadPin(SS6_GPIO_Port, SS6_Pin);
+  pSensor->SS7 = HAL_GPIO_ReadPin(SS7_GPIO_Port, SS7_Pin);
+  pSensor->SS8 = HAL_GPIO_ReadPin(SS8_GPIO_Port, SS8_Pin);
+  pInput->IN1 = HAL_GPIO_ReadPin(IO9_GPIO_Port,  IO9_Pin);
+  pInput->IN2 = HAL_GPIO_ReadPin(IO10_GPIO_Port, IO10_Pin);
+  pInput->IN3 = HAL_GPIO_ReadPin(IO11_GPIO_Port, IO11_Pin);
+  pInput->IN4 = HAL_GPIO_ReadPin(IO12_GPIO_Port, IO12_Pin);
+  pInput->IN5 = HAL_GPIO_ReadPin(IO13_GPIO_Port, IO13_Pin);
+  pInput->IN6 = HAL_GPIO_ReadPin(IO14_GPIO_Port, IO14_Pin);
+  pInput->IN7 = HAL_GPIO_ReadPin(IO15_GPIO_Port, IO15_Pin);
+  pInput->IN8 = HAL_GPIO_ReadPin(IO16_GPIO_Port, IO16_Pin);
+  pInput->IN9 = HAL_GPIO_ReadPin(IO17_GPIO_Port, IO17_Pin);
+  HAL_Delay(5);
+#endif
+}
 /* USER CODE END 0 */
 
 /*----------------------------------------------------------------------------*/
@@ -43,8 +67,8 @@ void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
@@ -60,6 +84,12 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, IO2_Pin|IO1_Pin|IO14_Pin|IO13_Pin 
                           |IO12_Pin|IO11_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : PCPin PCPin PCPin PCPin */
+  GPIO_InitStruct.Pin = SS8_Pin|SW2_Pin|BUTTON_Pin|SS1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PAPin PAPin PAPin PAPin 
                            PAPin PAPin PAPin PAPin 
@@ -96,12 +126,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(SW1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PCPin PCPin PCPin */
-  GPIO_InitStruct.Pin = SW2_Pin|BUTTON_Pin|SS1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
   /*Configure GPIO pin : PtPin */
   GPIO_InitStruct.Pin = SS2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
@@ -110,8 +134,8 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : PBPin PBPin PBPin PBPin 
                            PBPin */
-  GPIO_InitStruct.Pin = SS3_Pin|SS4_Pin|SS5_Pin|SS7_Pin 
-                          |SS8_Pin;
+  GPIO_InitStruct.Pin = SS3_Pin|SS4_Pin|SS5_Pin|SS6_Pin 
+                          |SS7_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
