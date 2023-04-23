@@ -65,6 +65,13 @@ outputBoard_t output;
 sensor_t sensor;
 tickTimer gFlagTimer;
 
+extern const char *inputDefine[];
+extern const char *inputDefineText[];
+extern const char *outputDefine[];
+extern const char *outputDefineTexts[];
+extern uint8_t rs232Rx[10];
+
+
 /* USER CODE END 0 */
 
 /**
@@ -106,9 +113,9 @@ int main(void)
   memset(&output, 0, sizeof(output));
   memset(&sensor, 0, sizeof(sensor));
 
-	HAL_UART_Receive_IT(&huart2, &rxData, 1);
-	// HAL_UART_Receive_IT(&huart2, buffer, 1);
-	// HAL_UART_Receive_IT(&huart3, buffer, 1);
+	HAL_UART_Receive_IT(&huart1, &rxData, 1);
+	// HAL_UART_Receive_IT(&huart2, &rxData, 1);
+	HAL_UART_Receive_IT(&huart3, rs232Rx, 10);
   HAL_TIM_Base_Start_IT(&htim5);
   HAL_TIM_Base_Start_IT(&htim6);
   HAL_TIM_Base_Start_IT(&htim7);
@@ -121,8 +128,25 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    if(gFlagTimer.Time_5ms)
+    if(HAL_GPIO_ReadPin(BUTTON_GPIO_Port,BUTTON_Pin) == GPIO_PIN_RESET)
     {
+      init();
+      // nextionSendOutput(5,1);
+      // nextionSendOutput(6,1);
+      // nextionSendOutput(7,1);
+      // nextionSendOutput(8,0);
+      // nextionSendOutput(9,0);
+      // nextionSendClick(SENSORA, SENSOR_LINE, 1);
+      // nextionSendClick(SENSORB, SENSOR_LINE, 1);
+      // nextionSendClick(SENSORC, SENSOR_LINE, 1);
+      // nextionSendClick(SENSORD, SENSOR_LINE, 1);
+      // nextionSendClick(3, INPUT_LINE, 1);
+      // nextionSendClick(3, INPUT_LINE, 1);
+      // nextionSendClick(4, OUTPUT_LINE, 1);
+      // nextionSendClick(6, OUTPUT_LINE, 1);
+    }
+    if(gFlagTimer.Time_5ms)
+    { 
       getManualStatusIO();
       gFlagTimer.Time_5ms = 0;
     }
@@ -145,6 +169,7 @@ int main(void)
     }
     if(gFlagTimer.Time_1000ms)
     {
+			HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
       gFlagTimer.Time_1000ms = 0;
     }
   }

@@ -34,6 +34,7 @@ bool rxOutputManual[OUT_MAX]={0};
 bool rxRelayManual[RELAY_MAX]={0};
 char *click = "Click=";
 char type[10]  = "Type=";
+uint8_t sendData2Board[22];
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;

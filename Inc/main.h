@@ -71,46 +71,46 @@ void Error_Handler(void);
 #define LED2_GPIO_Port GPIOA
 #define BUZZER_Pin GPIO_PIN_4
 #define BUZZER_GPIO_Port GPIOA
-#define IO7_Pin GPIO_PIN_5
+#define IO1_Pin GPIO_PIN_5
+#define IO1_GPIO_Port GPIOA
+#define IO7_Pin GPIO_PIN_6
 #define IO7_GPIO_Port GPIOA
-#define IO6_Pin GPIO_PIN_6
-#define IO6_GPIO_Port GPIOA
-#define IO5_Pin GPIO_PIN_7
-#define IO5_GPIO_Port GPIOA
-#define IO4_Pin GPIO_PIN_4
-#define IO4_GPIO_Port GPIOC
-#define IO3_Pin GPIO_PIN_5
-#define IO3_GPIO_Port GPIOC
-#define IO2_Pin GPIO_PIN_0
-#define IO2_GPIO_Port GPIOB
-#define IO1_Pin GPIO_PIN_1
-#define IO1_GPIO_Port GPIOB
-#define IO14_Pin GPIO_PIN_12
-#define IO14_GPIO_Port GPIOB
-#define IO13_Pin GPIO_PIN_13
-#define IO13_GPIO_Port GPIOB
-#define IO12_Pin GPIO_PIN_14
-#define IO12_GPIO_Port GPIOB
-#define IO11_Pin GPIO_PIN_15
-#define IO11_GPIO_Port GPIOB
-#define IO10_Pin GPIO_PIN_6
-#define IO10_GPIO_Port GPIOC
-#define IO9_Pin GPIO_PIN_7
+#define IO8_Pin GPIO_PIN_7
+#define IO8_GPIO_Port GPIOA
+#define IO2_Pin GPIO_PIN_4
+#define IO2_GPIO_Port GPIOC
+#define IO9_Pin GPIO_PIN_5
 #define IO9_GPIO_Port GPIOC
-#define IO8_Pin GPIO_PIN_8
-#define IO8_GPIO_Port GPIOC
-#define RL1_Pin GPIO_PIN_9
-#define RL1_GPIO_Port GPIOC
-#define RL2_Pin GPIO_PIN_8
+#define IO3_Pin GPIO_PIN_0
+#define IO3_GPIO_Port GPIOB
+#define IO15_Pin GPIO_PIN_1
+#define IO15_GPIO_Port GPIOB
+#define IO4_Pin GPIO_PIN_12
+#define IO4_GPIO_Port GPIOB
+#define IO16_Pin GPIO_PIN_13
+#define IO16_GPIO_Port GPIOB
+#define IO5_Pin GPIO_PIN_14
+#define IO5_GPIO_Port GPIOB
+#define IO17_Pin GPIO_PIN_15
+#define IO17_GPIO_Port GPIOB
+#define IO6_Pin GPIO_PIN_6
+#define IO6_GPIO_Port GPIOC
+#define IO18_Pin GPIO_PIN_7
+#define IO18_GPIO_Port GPIOC
+#define IO10_Pin GPIO_PIN_8
+#define IO10_GPIO_Port GPIOC
+#define IO11_Pin GPIO_PIN_9
+#define IO11_GPIO_Port GPIOC
+#define IO12_Pin GPIO_PIN_8
+#define IO12_GPIO_Port GPIOA
+#define IO13_Pin GPIO_PIN_9
+#define IO13_GPIO_Port GPIOA
+#define IO14_Pin GPIO_PIN_10
+#define IO14_GPIO_Port GPIOA
+#define RL1_Pin GPIO_PIN_11
+#define RL1_GPIO_Port GPIOA
+#define RL2_Pin GPIO_PIN_12
 #define RL2_GPIO_Port GPIOA
-#define IO18_Pin GPIO_PIN_9
-#define IO18_GPIO_Port GPIOA
-#define IO17_Pin GPIO_PIN_10
-#define IO17_GPIO_Port GPIOA
-#define IO16_Pin GPIO_PIN_11
-#define IO16_GPIO_Port GPIOA
-#define IO15_Pin GPIO_PIN_12
-#define IO15_GPIO_Port GPIOA
 #define SW1_Pin GPIO_PIN_15
 #define SW1_GPIO_Port GPIOA
 #define SW2_Pin GPIO_PIN_10
@@ -169,6 +169,19 @@ typedef struct __SENSOR_
   bool SS7;  
   bool SS8;   
 }sensor_t;
+
+enum sensorIndex
+{
+  SENSORA = 1,
+  SENSORB,
+  SENSORC,
+  SENSORD,
+  SENSORE,
+  SENSORF,
+  SENSORG,
+  SENSORH,
+  SENSORMAX,
+};
 
 typedef struct timer
 {
