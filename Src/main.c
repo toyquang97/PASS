@@ -26,7 +26,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "hmi.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -70,7 +70,7 @@ extern const char *inputDefineText[];
 extern const char *outputDefine[];
 extern const char *outputDefineTexts[];
 extern uint8_t rs232Rx[10];
-
+extern bool isManualMode;
 
 /* USER CODE END 0 */
 
@@ -130,45 +130,46 @@ int main(void)
     /* USER CODE BEGIN 3 */
     if(HAL_GPIO_ReadPin(BUTTON_GPIO_Port,BUTTON_Pin) == GPIO_PIN_RESET)
     {
-      init();
-      // nextionSendOutput(5,1);
-      // nextionSendOutput(6,1);
+
+      nextionSendOutput(1,1);
+      nextionSendOutput(2,0);
       // nextionSendOutput(7,1);
       // nextionSendOutput(8,0);
       // nextionSendOutput(9,0);
-      // nextionSendClick(SENSORA, SENSOR_LINE, 1);
-      // nextionSendClick(SENSORB, SENSOR_LINE, 1);
-      // nextionSendClick(SENSORC, SENSOR_LINE, 1);
-      // nextionSendClick(SENSORD, SENSOR_LINE, 1);
-      // nextionSendClick(3, INPUT_LINE, 1);
-      // nextionSendClick(3, INPUT_LINE, 1);
-      // nextionSendClick(4, OUTPUT_LINE, 1);
-      // nextionSendClick(6, OUTPUT_LINE, 1);
+
     }
+
     if(gFlagTimer.Time_5ms)
     { 
-      getManualStatusIO();
+      if (isManualMode == AUTO)
+      {
+        getManualStatusIO();
+      }
+      
       gFlagTimer.Time_5ms = 0;
     }
     if(gFlagTimer.Time_10ms)
     {
-      readAllInput(&sensor, &input);
-#if KEEP_DEBUG
-      memset(&sensor, 1, sizeof(sensor));
-      memset(&input, 1, sizeof(input));
-#endif
+      //readAllInput(&sensor, &input);
+
       gFlagTimer.Time_10ms = 0;
     }
     if(gFlagTimer.Time_50ms)
     {
+      changeOutputHmi(input);
       gFlagTimer.Time_50ms = 0;
     }
     if(gFlagTimer.Time_100ms)
     {
+      setGPIOMode(isManualMode);
       gFlagTimer.Time_100ms = 0;
     }
     if(gFlagTimer.Time_1000ms)
     {
+#if KEEP_DEBUG
+      memset(&sensor, 0, sizeof(sensor));
+      memset(&input, 0, sizeof(input));
+#endif
 			HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
       gFlagTimer.Time_1000ms = 0;
     }

@@ -42,7 +42,8 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
+#define KEEP_DEBUG 1
+#define HMI_UART huart1
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -183,6 +184,63 @@ enum sensorIndex
   SENSORMAX,
 };
 
+enum __TYPE_
+{
+  BLACKBELT_PRO_IO_A_ONLY,
+  BLACKBELT_PRO_IO_B_ONLY,
+  BLACKBELT_PRO_IO_A_B,
+  BLACKBELT_IO_A_ONLY,
+  BLACKBELT_IO_B_ONLY,
+  BLACKBELT_IO_A_B,
+  I28_IO_A_ONLY,
+  I28_IO_B_ONLY,
+  I28_IO_A_B,
+  TRACERMATE_IO_A_ONLY,
+  TRACERMATE_IO_B_ONLY,
+  TRACERMATE_IO_A_B,
+  LPC528,
+  C28,
+  C20WE,
+  MH,
+  MAX_TYPE,
+};
+enum __RELAY_
+{
+  RELAY1 = 1,
+  RELAY2,
+  RELAY3,
+  RELAY4,
+  RELAY_MAX,
+};
+
+enum __INPUTMANUAL_
+{
+  IN1 = 1,
+  IN2,
+  IN3,
+  IN4,
+  IN5,
+  IN6,
+  IN7,
+  IN8,
+  IN9,
+  IN_MAX,
+};
+
+enum __OUTPUTMANUAL_
+{
+  OUT1 = 1,
+  OUT2,
+  OUT3,
+  OUT4,
+  OUT5,
+  OUT6,
+  OUT7,
+  OUT8,
+  OUT9,
+  OUT_MAX,
+};
+
 typedef struct timer
 {
 	uint8_t Time_5ms : 1;	// 10ms 
@@ -196,6 +254,12 @@ typedef struct timer
 	uint8_t Time_1hr : 1; // 1hr 
 } tickTimer;
 
+
+enum settingMode
+{
+  AUTO = 0,
+  MANUAL,
+};
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

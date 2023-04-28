@@ -38,7 +38,8 @@
 void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-void init(void);
+void setGPIOMode(bool setMode);
+void readAllInput(sensor_t *pSensor, inputBoard_t *pInput);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

@@ -10,21 +10,21 @@ void nextionSendOutput(uint8_t index,bool active)
     int len;
 
     len = sprintf (buf, "pgIODisplay.b%s.bco=%s", outputDefine[index], active ? "RED" : "WHITE");
-	HAL_UART_Transmit(&huart2, (uint8_t *)buf, len, 1000);
-	HAL_UART_Transmit(&huart2, Cmd_End, 3, 100);
+	HAL_UART_Transmit(&HMI_UART, (uint8_t *)buf, len, 1000);
+	HAL_UART_Transmit(&HMI_UART, Cmd_End, 3, 100);
 
     len = sprintf (buf, "pgIODisplay.b%s.pco=%s", outputDefine[index], active ? "WHITE" : "BLACK");
-	HAL_UART_Transmit(&huart2, (uint8_t *)buf, len, 1000);
-	HAL_UART_Transmit(&huart2, Cmd_End, 3, 100);
+	HAL_UART_Transmit(&HMI_UART, (uint8_t *)buf, len, 1000);
+	HAL_UART_Transmit(&HMI_UART, Cmd_End, 3, 100);
 
-    len = sprintf (buf, "pgIODisplay.b%s.txt=%s %s", outputDefine[index], outputDefineText[index], active ? "ON" : "OFF");
-	HAL_UART_Transmit(&huart2, (uint8_t *)buf, len, 1000);
-	HAL_UART_Transmit(&huart2, Cmd_End, 3, 100);
+    len = sprintf (buf, "pgIODisplay.b%s.txt=%c%s %s%c", outputDefine[index], '"',outputDefineText[index], active ? "ON" : "OFF", '"');
+	HAL_UART_Transmit(&HMI_UART, (uint8_t *)buf, len, 1000);
+	HAL_UART_Transmit(&HMI_UART, Cmd_End, 3, 100);
 
     len = sprintf (buf, "g_.va%s.val=%d", inputDefine[index], active ? 1 : 0);
 
-	HAL_UART_Transmit(&huart2, (uint8_t *)buf, len, 1000);
-	HAL_UART_Transmit(&huart2, Cmd_End, 3, 100);
+	HAL_UART_Transmit(&HMI_UART, (uint8_t *)buf, len, 1000);
+	HAL_UART_Transmit(&HMI_UART, Cmd_End, 3, 100);
 }
 
 void nextionSendInput(uint8_t index, bool active)
@@ -35,20 +35,20 @@ void nextionSendInput(uint8_t index, bool active)
 
     len = sprintf (buf, "pgIODisplay.b%s.bco=%s", inputDefine[index], active ? "WHITE" : "GREEN");
     
-	HAL_UART_Transmit(&huart2, (uint8_t *)buf, len, 1000);
-	HAL_UART_Transmit(&huart2, Cmd_End, 3, 100);
+	HAL_UART_Transmit(&HMI_UART, (uint8_t *)buf, len, 1000);
+	HAL_UART_Transmit(&HMI_UART, Cmd_End, 3, 100);
 
  
     len = sprintf (buf, "pgIODisplay.b%s.txt=%s %s", inputDefine[index], inputDefineText[index], active ? "ON" : "OFF");
 
-	HAL_UART_Transmit(&huart2, (uint8_t *)buf, len, 1000);
-	HAL_UART_Transmit(&huart2, Cmd_End, 3, 100);
+	HAL_UART_Transmit(&HMI_UART, (uint8_t *)buf, len, 1000);
+	HAL_UART_Transmit(&HMI_UART, Cmd_End, 3, 100);
     
 
     len = sprintf (buf, "g_.va%s.val=%d", inputDefine[index], active ? 1 : 0);
 
-	HAL_UART_Transmit(&huart2, (uint8_t *)buf, len, 1000);
-	HAL_UART_Transmit(&huart2, Cmd_End, 3, 100);
+	HAL_UART_Transmit(&HMI_UART, (uint8_t *)buf, len, 1000);
+	HAL_UART_Transmit(&HMI_UART, Cmd_End, 3, 100);
 }
 
 void nextionSendClick(uint8_t index, setupType_t type, bool active)
@@ -73,8 +73,8 @@ void nextionSendClick(uint8_t index, setupType_t type, bool active)
 	default:
 		break;
 	}
-	HAL_UART_Transmit(&huart2, (uint8_t *)buf, len, 1000);
-	HAL_UART_Transmit(&huart2, Cmd_End, 3, 100);
+	HAL_UART_Transmit(&HMI_UART, (uint8_t *)buf, len, 1000);
+	HAL_UART_Transmit(&HMI_UART, Cmd_End, 3, 100);
 
 	switch (type)
 	{
@@ -93,7 +93,20 @@ void nextionSendClick(uint8_t index, setupType_t type, bool active)
 	default:
 		break;
 	}
-	HAL_UART_Transmit(&huart2, (uint8_t *)buf, len, 1000);
-	HAL_UART_Transmit(&huart2, Cmd_End, 3, 100);
+	HAL_UART_Transmit(&HMI_UART, (uint8_t *)buf, len, 1000);
+	HAL_UART_Transmit(&HMI_UART, Cmd_End, 3, 100);
+}
 
+void changeOutputHmi(inputBoard_t input)
+{
+	static inputBoard_t preInputCheck = {0};
+	for (int i = 0; i < IN_MAX; i++)
+	{
+		if (*((bool *)(&preInputCheck) + i) != *((bool *)(&input) + i))
+		{
+			memcpy(&preInputCheck, &input, sizeof(input));
+			nextionSendOutput((i + 1),*((bool *)(&input) + i));
+			//return;
+		}
+	}
 }
