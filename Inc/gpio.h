@@ -28,11 +28,16 @@
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "queue.h"
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
-
+extern QUEUE inputQueueHMI;
+extern QUEUE outputQueueHMI;
+extern QUEUE sensorQueueHMI;
+extern QUEUE sensorQueueIO;
+// extern sensor_t preSensorCheck;
+// extern inputBoard_t preInputCheck;
 /* USER CODE END Private defines */
 
 void MX_GPIO_Init(void);
@@ -40,6 +45,8 @@ void MX_GPIO_Init(void);
 /* USER CODE BEGIN Prototypes */
 void setGPIOMode(bool setMode);
 void readAllInput(sensor_t *pSensor, inputBoard_t *pInput);
+void controlGPIOByManualMode(bool mode, bool *pInput, bool *pOutput, bool *pRelay);
+void controlGPIOByAutoMode(MAPPING_DATA_t mapData);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

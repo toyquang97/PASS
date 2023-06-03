@@ -27,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "hmi.h"
+#include "queue.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,19 +60,45 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 extern uint8_t rxBufferHMI[MAX_LENGTH];
 extern uint8_t rxData;
+extern uint8_t rxDataComm;
 extern bool isMaster;
 inputBoard_t input;
 outputBoard_t output;
 sensor_t sensor;
+// sensor_t preSensorCheck = {0};
+// outputBoard_t preOutputCheck = {0};
+// inputBoard_t preInputCheck = {0};
+bool rxInputManual[IN_MAX*2]={0};
+bool rxOutputManual[OUT_MAX*2]={0};
+bool rxRelayManual[RELAY_MAX*2]={0};
 tickTimer gFlagTimer;
-
-extern const char *inputDefine[];
-extern const char *inputDefineText[];
-extern const char *outputDefine[];
-extern const char *outputDefineTexts[];
+QUEUE sensorQueueHMI, inputQueueHMI, outputQueueHMI, commandQueue;
+QUEUE sensorQueueIO, inputQueueIO;
+MAPPING_DATA_t mappedData;
 extern uint8_t rs232Rx[10];
 extern bool isManualMode;
 
+#if 1
+#if defined(__GNUC__)
+int _write(int fd, char * ptr, int len) { 
+  HAL_UART_Transmit( &huart2, (uint8_t * ) ptr, len, HAL_MAX_DELAY);
+  return len;
+}
+#elif defined(__ICCARM__)
+#include "LowLevelIOInterface.h"
+
+size_t __write(int handle,
+  const unsigned char * buffer, size_t size) {
+  HAL_UART_Transmit( &huart2, (uint8_t * ) buffer, size, HAL_MAX_DELAY);
+  return size;
+}
+#elif defined(__CC_ARM)
+int fputc(int ch, FILE * f) {
+  HAL_UART_Transmit( &huart2, (uint8_t * ) & ch, 1, HAL_MAX_DELAY);
+  return ch;
+}
+#endif
+#endif
 /* USER CODE END 0 */
 
 /**
@@ -112,9 +139,22 @@ int main(void)
   memset(&input,  0, sizeof(input));
   memset(&output, 0, sizeof(output));
   memset(&sensor, 0, sizeof(sensor));
+  memset(&sensorQueueHMI, 0, sizeof(sensorQueueHMI));
+  memset(&sensorQueueIO, 0, sizeof(sensorQueueIO));
+  memset(&inputQueueHMI, 0, sizeof(inputQueueHMI));
+  memset(&inputQueueIO, 0, sizeof(inputQueueIO));
+  memset(&outputQueueHMI, 0, sizeof(outputQueueHMI));
+  memset(&mappedData, 0, sizeof(mappedData));
+
+  initializeQueue(&sensorQueueHMI);
+  initializeQueue(&sensorQueueIO);
+  initializeQueue(&inputQueueHMI);
+  initializeQueue(&inputQueueIO);
+  initializeQueue(&outputQueueHMI);
+  initializeQueue(&commandQueue);
 
 	HAL_UART_Receive_IT(&huart1, &rxData, 1);
-	// HAL_UART_Receive_IT(&huart2, &rxData, 1);
+	HAL_UART_Receive_IT(&huart2, &rxDataComm, 1);
 	HAL_UART_Receive_IT(&huart3, rs232Rx, 10);
   HAL_TIM_Base_Start_IT(&htim5);
   HAL_TIM_Base_Start_IT(&htim6);
@@ -131,48 +171,52 @@ int main(void)
     if(HAL_GPIO_ReadPin(BUTTON_GPIO_Port,BUTTON_Pin) == GPIO_PIN_RESET)
     {
 
-      nextionSendOutput(1,1);
-      nextionSendOutput(2,0);
-      // nextionSendOutput(7,1);
-      // nextionSendOutput(8,0);
-      // nextionSendOutput(9,0);
-
     }
 
     if(gFlagTimer.Time_5ms)
     { 
-      if (isManualMode == AUTO)
-      {
-        getManualStatusIO();
-      }
-      
+      readAllInput(&sensor, &input);
       gFlagTimer.Time_5ms = 0;
     }
     if(gFlagTimer.Time_10ms)
     {
-      //readAllInput(&sensor, &input);
-
+      eventHmiHandler(&commandQueue);
+      setGPIOMode(isManualMode);
+      if (isManualMode == AUTO)
+      {
+        
+      }
+      else
+      {
+        controlGPIOByManualMode(isManualMode, rxInputManual, rxOutputManual, rxRelayManual);
+      }
       gFlagTimer.Time_10ms = 0;
     }
     if(gFlagTimer.Time_50ms)
     {
-      changeOutputHmi(input);
+      changeHmiStatus(isManualMode, input, sensor);
       gFlagTimer.Time_50ms = 0;
     }
     if(gFlagTimer.Time_100ms)
     {
-      setGPIOMode(isManualMode);
       gFlagTimer.Time_100ms = 0;
     }
     if(gFlagTimer.Time_1000ms)
     {
-#if KEEP_DEBUG
-      memset(&sensor, 0, sizeof(sensor));
-      memset(&input, 0, sizeof(input));
-#endif
 			HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
       gFlagTimer.Time_1000ms = 0;
     }
+    if(gFlagTimer.Time_2s)
+    {
+#if KEEP_DEBUG
+      memset(&sensor, 0, sizeof(sensor));
+      memset(&input, 0, sizeof(input));
+      memset(&output, 0, sizeof(output));
+#endif
+			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
+      gFlagTimer.Time_2s = 0;
+    }
+
   }
   /* USER CODE END 3 */
 }

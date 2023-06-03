@@ -42,8 +42,10 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-#define KEEP_DEBUG 1
+#define KEEP_DEBUG 0
 #define HMI_UART huart1
+#define SLAVE_UART huart2
+#define RS232_UART huart3
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -60,7 +62,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+#define MAX_LENGTH 30
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -72,42 +74,42 @@ void Error_Handler(void);
 #define LED2_GPIO_Port GPIOA
 #define BUZZER_Pin GPIO_PIN_4
 #define BUZZER_GPIO_Port GPIOA
-#define IO1_Pin GPIO_PIN_5
-#define IO1_GPIO_Port GPIOA
-#define IO7_Pin GPIO_PIN_6
-#define IO7_GPIO_Port GPIOA
-#define IO8_Pin GPIO_PIN_7
-#define IO8_GPIO_Port GPIOA
-#define IO2_Pin GPIO_PIN_4
-#define IO2_GPIO_Port GPIOC
-#define IO9_Pin GPIO_PIN_5
-#define IO9_GPIO_Port GPIOC
-#define IO3_Pin GPIO_PIN_0
-#define IO3_GPIO_Port GPIOB
-#define IO15_Pin GPIO_PIN_1
-#define IO15_GPIO_Port GPIOB
-#define IO4_Pin GPIO_PIN_12
-#define IO4_GPIO_Port GPIOB
-#define IO16_Pin GPIO_PIN_13
-#define IO16_GPIO_Port GPIOB
-#define IO5_Pin GPIO_PIN_14
-#define IO5_GPIO_Port GPIOB
-#define IO17_Pin GPIO_PIN_15
-#define IO17_GPIO_Port GPIOB
-#define IO6_Pin GPIO_PIN_6
-#define IO6_GPIO_Port GPIOC
-#define IO18_Pin GPIO_PIN_7
-#define IO18_GPIO_Port GPIOC
-#define IO10_Pin GPIO_PIN_8
-#define IO10_GPIO_Port GPIOC
-#define IO11_Pin GPIO_PIN_9
-#define IO11_GPIO_Port GPIOC
-#define IO12_Pin GPIO_PIN_8
-#define IO12_GPIO_Port GPIOA
-#define IO13_Pin GPIO_PIN_9
-#define IO13_GPIO_Port GPIOA
-#define IO14_Pin GPIO_PIN_10
-#define IO14_GPIO_Port GPIOA
+#define OUT6_Pin GPIO_PIN_5
+#define OUT6_GPIO_Port GPIOA
+#define OUT5_Pin GPIO_PIN_6
+#define OUT5_GPIO_Port GPIOA
+#define OUT4_Pin GPIO_PIN_7
+#define OUT4_GPIO_Port GPIOA
+#define OUT1_Pin GPIO_PIN_4
+#define OUT1_GPIO_Port GPIOC
+#define IN7_Pin GPIO_PIN_5
+#define IN7_GPIO_Port GPIOC
+#define OUT7_Pin GPIO_PIN_0
+#define OUT7_GPIO_Port GPIOB
+#define OUT8_Pin GPIO_PIN_1
+#define OUT8_GPIO_Port GPIOB
+#define OUT3_Pin GPIO_PIN_12
+#define OUT3_GPIO_Port GPIOB
+#define OUT2_Pin GPIO_PIN_13
+#define OUT2_GPIO_Port GPIOB
+#define IN8_Pin GPIO_PIN_14
+#define IN8_GPIO_Port GPIOB
+#define OUT9_Pin GPIO_PIN_15
+#define OUT9_GPIO_Port GPIOB
+#define IN3_Pin GPIO_PIN_6
+#define IN3_GPIO_Port GPIOC
+#define IN9_Pin GPIO_PIN_7
+#define IN9_GPIO_Port GPIOC
+#define IN6_Pin GPIO_PIN_8
+#define IN6_GPIO_Port GPIOC
+#define IN2_Pin GPIO_PIN_9
+#define IN2_GPIO_Port GPIOC
+#define IN1_Pin GPIO_PIN_8
+#define IN1_GPIO_Port GPIOA
+#define IN5_Pin GPIO_PIN_9
+#define IN5_GPIO_Port GPIOA
+#define IN4_Pin GPIO_PIN_10
+#define IN4_GPIO_Port GPIOA
 #define RL1_Pin GPIO_PIN_11
 #define RL1_GPIO_Port GPIOA
 #define RL2_Pin GPIO_PIN_12
@@ -171,19 +173,6 @@ typedef struct __SENSOR_
   bool SS8;   
 }sensor_t;
 
-enum sensorIndex
-{
-  SENSORA = 1,
-  SENSORB,
-  SENSORC,
-  SENSORD,
-  SENSORE,
-  SENSORF,
-  SENSORG,
-  SENSORH,
-  SENSORMAX,
-};
-
 enum __TYPE_
 {
   BLACKBELT_PRO_IO_A_ONLY,
@@ -208,8 +197,6 @@ enum __RELAY_
 {
   RELAY1 = 1,
   RELAY2,
-  RELAY3,
-  RELAY4,
   RELAY_MAX,
 };
 
@@ -241,6 +228,19 @@ enum __OUTPUTMANUAL_
   OUT_MAX,
 };
 
+enum sensorIndex
+{
+  SENSORA = 1,
+  SENSORB,
+  SENSORC,
+  SENSORD,
+  SENSORE,
+  SENSORF,
+  SENSORG,
+  SENSORH,
+  SENSORMAX,
+};
+
 typedef struct timer
 {
 	uint8_t Time_5ms : 1;	// 10ms 
@@ -257,9 +257,25 @@ typedef struct timer
 
 enum settingMode
 {
-  AUTO = 0,
-  MANUAL,
+  MANUAL = 0,
+  AUTO,
 };
+
+typedef struct __MAPPING_
+{
+  uint8_t IN[18];
+  uint8_t OUT[4];
+  uint32_t duration;
+}MAPPING_DATA_t;
+
+
+typedef struct {
+  GPIO_TypeDef* port;  // Con tr�? đến GPIO Port
+  uint16_t pin;        // Số GPIO Pin
+} GPIO_Config_t;
+
+// Khai báo một mảng của struct GPIO_Config
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

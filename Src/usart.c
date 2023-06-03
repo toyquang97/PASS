@@ -24,17 +24,18 @@
 char rxBufferHMI[MAX_LENGTH];
 char preRxBufferHMI[MAX_LENGTH];
 uint8_t rxData = 0;
+uint8_t rxDataComm = 0;
 uint8_t countRxByte = 0;
-bool isManualMode = 0;
+bool isManualMode = AUTO;
 uint8_t instrumentType = BLACKBELT_PRO_IO_A_ONLY;
 bool isMaster = 0;
 ioRegister_t rxIOdata;
-bool rxInputManual[IN_MAX]={0};
-bool rxOutputManual[OUT_MAX]={0};
-bool rxRelayManual[RELAY_MAX]={0};
-char *click = "Click=";
-char type[10]  = "Type=";
+extern bool rxInputManual[];
+extern bool rxOutputManual[];
+extern bool rxRelayManual[];
 uint8_t sendData2Board[22];
+extern QUEUE commandQueue;
+char sensorMappingCommand[] ={'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I','J','K','M','N','O','P'};
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;
@@ -264,82 +265,167 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 
 /* USER CODE BEGIN 1 */
 
-void getManualStatusIO(void)
+
+bool checkStringBelongToCommand(char *pRxHMI)
 {
-  char temp[30];
-  if (isManualMode)
+  if (strstr(pRxHMI, "IN") != NULL)
   {
-    for (int i = 1; i <= IN_MAX; i++)
+    return true;
+  }
+  if (strstr(pRxHMI, "OUT") != NULL)
+  {
+    return true;
+  }
+  if (strstr(pRxHMI, "REL") != NULL)
+  {
+    return true;
+  }
+  if (strstr(pRxHMI, "Click") != NULL)
+  {
+    return true;
+  }
+  if (strstr(pRxHMI, "Type") != NULL)
+  {
+    return true;
+  }
+  if (strstr(pRxHMI, "Map") != NULL)
+  {
+    return true;
+  }
+  return false;
+}
+
+void getEventStatusHMi(char *pRxCommand)
+{
+  HMI_CONTROL_IO commandStr = {0};
+  if (checkStringBelongToCommand(pRxCommand)) // first check if this is command will collect it into event
+  {
+    strcpy(commandStr.commandID, pRxCommand);
+    if (isQueueFull(&commandQueue))
     {
-      sprintf(temp,"IN%d=%d%c",i, 1,'\r');
-      if (!strcmp(rxBufferHMI, temp))
-      {
-        rxInputManual[i] = 1;
-      }
-      else
-      {
-        sprintf(temp,"IN%d=%d%c",i, 0,'\r');
-        if (!strcmp(rxBufferHMI, temp))
-        {
-          rxInputManual[i] = 0;
-        }
-      }
+      return;
     }
-    for (int i = 1; i <= OUT_MAX; i++)
+    else
     {
-      sprintf(temp,"OUT%d=%d%c",i, 1,'\r');
-      if (!strcmp(rxBufferHMI, temp))
-      {
-        rxOutputManual[i] = 1;
-      }
-      else
-      {
-        sprintf(temp,"OUT%d=%d%c",i, 0,'\r');
-        if (!strcmp(rxBufferHMI, temp))
-        {
-          rxOutputManual[i] = 0;
-        }
-      }
-    }
-    for (int i = 1; i <= RELAY_MAX; i++)
-    {
-      sprintf(temp,"REL%d=%d%c",i, 1,'\r');
-      if (!strcmp(rxBufferHMI, temp))
-      {
-        rxRelayManual[i] = 1;
-      }
-      else
-      {
-        sprintf(temp,"REL%d=%d%c",i, 0,'\r');
-        if (!strcmp(rxBufferHMI, temp))
-        {
-          rxRelayManual[i] = 0;
-        }
-      }
+      insertQueueControlIO(&commandQueue, commandStr);
     }
   }
 }
 
-void uartHandlerVar(void)
+int convertCharToNumber(char *index) // generate by chatGPT
 {
-  char temp[30];
-  if (!strcmp(rxBufferHMI, "Click=1\r"))
+  int res = ERROR_DIGIT;
+  char *numberString = strstr(index, "=");
+
+  if (numberString != NULL)
   {
-    isManualMode = 0;
+    res = atoi(numberString + 1); 
+    return res;
   }
-  else if (!strcmp(rxBufferHMI, "Click=0\r"))
+  return res;
+}
+
+void convertCharToArrayValue(char *input, bool *pIndex) // generate by chatGPT
+{
+  char *token = strtok(input, "="); // seperate string by "="
+  int index;
+	bool value;
+
+  if (token != NULL)
   {
-    isManualMode = 1;
-  }
-  
-  for (int i = BLACKBELT_PRO_IO_A_ONLY; i < MAX_TYPE; i++)
-  {
-    sprintf(temp,"Type=%d%c",i, '\r');
-    if (!strcmp(rxBufferHMI, temp))
+    if (strlen(input) > 3)
     {
-      instrumentType = i;
+      index = atoi(token + 3); // convert token to INT, skip "OUT", "REL"
     }
-  }  
+    else
+    {
+      index = atoi(token + 2); // convert token to INT, skip "IN"
+    }
+    token = strtok(NULL, "=");
+    if (token != NULL)
+    {
+      value = (bool)atoi(token); // CONVERT remain token to INT
+    }
+  }
+  *(pIndex + index) = value;
+}
+
+void getMappingTable(char *input, MAPPING_DATA_t *mapData)
+{
+	#if 0 
+  char* token;
+  char* rest = strdup(str);  // Tạo một bản sao của chuỗi đầu vào
+
+  // Tách chuỗi dựa trên dấu phân cách '^'
+  token = strtok(rest, "^");
+
+  int i = 0;
+  while (token != NULL) {
+    // Gán giá trị cho mảng OUT hoặc IN dựa trên vị trí
+    if (i == 2) {
+      data->OUT[0] = atoi(token);
+    } else if (i == 3) {
+      data->IN[0] = atoi(token);
+    }
+    token = strtok(NULL, "^");
+    i++;
+  }
+
+  free(rest);  // Giải phóng bộ nhớ
+	#endif
+}
+
+
+void eventHmiHandler(QUEUE *event)
+{
+  if (isQueueEmpty(event))
+  {
+    return;
+  }
+  else
+  {
+    if (strstr(eventCommandHandler, "Click="))
+    {
+      isManualMode = convertCharToNumber(eventCommandHandler);
+      removeQueueCommand(event);
+      return;
+    }
+
+    if (strstr(eventCommandHandler, "Type="))
+    {
+      instrumentType = convertCharToNumber(eventCommandHandler);
+      removeQueueCommand(event);
+      return;
+    }
+
+    if (strstr(eventCommandHandler, "IN"))
+    {
+      convertCharToArrayValue(eventCommandHandler, rxInputManual);
+      removeQueueCommand(event);
+      return;
+    }
+
+    if (strstr(eventCommandHandler, "OUT"))
+    {
+      convertCharToArrayValue(eventCommandHandler, rxOutputManual);
+      removeQueueCommand(event);
+      return;
+    }
+
+    if (strstr(eventCommandHandler, "REL"))
+    {
+      convertCharToArrayValue(eventCommandHandler, rxRelayManual);
+      removeQueueCommand(event);
+      return;
+    }
+
+    if (strstr(eventCommandHandler, "Maps"))
+    {
+      // getMappingTable(eventCommandHandler, &mappedData);
+      removeQueueCommand(event);
+      return;
+    }
+  }
 }
 
 /* USER CODE END 1 */

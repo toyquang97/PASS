@@ -27,7 +27,8 @@
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "queue.h"
+#include <ctype.h>
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart1;
@@ -35,10 +36,10 @@ extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN Private defines */
-#define MAX_LENGTH 30
+
 //#define END_STRING "\r\n"
 #define END_STRING '\n'
-
+#define ERROR_DIGIT (-1)
 typedef struct __DATA_
 {
   bool IN1;
@@ -78,6 +79,8 @@ typedef struct __DATA_
   bool OUT17;   
   bool OUT18;   
 }ioRegister_t;
+
+#define eventCommandHandler (event->hmiControlIO->commandID)
 /* USER CODE END Private defines */
 
 void MX_USART1_UART_Init(void);
@@ -85,8 +88,8 @@ void MX_USART2_UART_Init(void);
 void MX_USART3_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-void uartHandlerVar(void);
-void getManualStatusIO(void);
+void eventHmiHandler(QUEUE *event);
+void getEventStatusHMi(char *pRxCommand);
 
 //const char *Click = "Click=";
 /* USER CODE END Prototypes */

@@ -2,11 +2,15 @@
 #define __HMI_H_
 
 #include "main.h"
+#include "queue.h"
 
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
-
+extern QUEUE inputQueueHMI;
+extern QUEUE outputQueueHMI;
+extern QUEUE sensorQueueHMI;
+extern bool isManualMode;
 
 
 typedef enum _PERIPHERAL_
@@ -17,27 +21,48 @@ typedef enum _PERIPHERAL_
     SENSOR_LINE,
 }setupType_t;
 
-static const char *inputDefine[]=
+static const char *indexDefine[]=
 {
-    "IN1",
-    "IN2",
-    "IN3",
-    "IN4",
-    "IN5",
-    "IN6",
-    "IN7",
-    "IN8",
-    "IN9",
-    "IN10",
-    "IN11",
-    "IN12",
-    "IN13",
-    "IN14",
-    "IN15",
-    "IN16",
-    "IN17",
-    "IN18",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
 };
+
+static const char *sensorDefine[]=
+{
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "G",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+};
+
 static const char *inputDefineText[]=
 {
     "In 1",
@@ -58,28 +83,6 @@ static const char *inputDefineText[]=
     "In 16",
     "In 17",
     "In 18",
-};
-
-static const char *outputDefine[]=
-{
-    "OUT1",
-    "OUT2",
-    "OUT3",
-    "OUT4",
-    "OUT5",
-    "OUT6",
-    "OUT7",
-    "OUT8",
-    "OUT9",
-    "OUT10",
-    "OUT11",
-    "OUT12",
-    "OUT13",
-    "OUT14",
-    "OUT15",
-    "OUT16",
-    "OUT17",
-    "OUT18",
 };
 
 static const char *outputDefineText[]=
@@ -103,7 +106,12 @@ static const char *outputDefineText[]=
     "Out 17",
     "Out 18",
 };
-void nextionSendOutput(uint8_t index,bool active);
+bool nextionSendOutput(uint8_t index,bool active);
+bool nextionSendSensor(uint8_t index, bool active);
+bool nextionSendInput(uint8_t index, bool active);
 void nextionSendClick(uint8_t index, setupType_t type, bool active);
 void changeOutputHmi(inputBoard_t input);
+void changeSensorHmi(sensor_t sensor);
+void changeInputHmi(outputBoard_t output);
+void changeHmiStatus(bool mode, inputBoard_t input, sensor_t sensor);
 #endif
