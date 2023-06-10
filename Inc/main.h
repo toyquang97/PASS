@@ -263,11 +263,14 @@ enum settingMode
 
 typedef struct __MAPPING_
 {
-  uint8_t IN[18];
-  uint8_t OUT[4];
-  uint32_t duration;
+  uint8_t IN[20];
+  uint8_t OUT[20];
+  uint32_t duration[20];
+  uint32_t countTime[20];
 }MAPPING_DATA_t;
 
+#define INDEX_INPUT_GPIO  (mapData.IN[sensorQueueIO.nodes[0].index])
+#define INDEX_OUTPUT_GPIO (mapData.OUT[sensorQueueIO.nodes[0].index])
 
 typedef struct {
   GPIO_TypeDef* port;  // Con tr�? đến GPIO Port

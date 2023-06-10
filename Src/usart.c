@@ -35,7 +35,7 @@ extern bool rxOutputManual[];
 extern bool rxRelayManual[];
 uint8_t sendData2Board[22];
 extern QUEUE commandQueue;
-char sensorMappingCommand[] ={'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I','J','K','M','N','O','P'};
+char sensorMappingCommand[] ={'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I','J','K','M','N','O','P', 'Z', 'U', 'X', 'V'};
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;
@@ -352,27 +352,41 @@ void convertCharToArrayValue(char *input, bool *pIndex) // generate by chatGPT
 
 void getMappingTable(char *input, MAPPING_DATA_t *mapData)
 {
-	#if 0 
-  char* token;
-  char* rest = strdup(str);  // Tạo một bản sao của chuỗi đầu vào
+  const char *delimiter = "^";
+  //char *rest = strdup("xxxx");
+  char *token = strtok(input, delimiter);
+  char mappingChar = token[0];
 
-  // Tách chuỗi dựa trên dấu phân cách '^'
-  token = strtok(rest, "^");
-
-  int i = 0;
-  while (token != NULL) {
-    // Gán giá trị cho mảng OUT hoặc IN dựa trên vị trí
-    if (i == 2) {
-      data->OUT[0] = atoi(token);
-    } else if (i == 3) {
-      data->IN[0] = atoi(token);
+  int position = -1;
+  for (int i = 0; i < 19; i++)
+  {
+    if (mappingChar == (char)sensorMappingCommand[i])
+    {
+      position = i;
+      break;
     }
-    token = strtok(NULL, "^");
-    i++;
   }
 
-  free(rest);  // Giải phóng bộ nhớ
-	#endif
+  token = strtok(NULL, delimiter);
+  if (position >= 0 && position < 19)
+  {
+    token = strtok(NULL, delimiter);
+    if (token != NULL)
+    {
+      mapData->IN[position] = atoi(token);
+    }
+    token = strtok(NULL, delimiter);
+    if (token != NULL)
+    {
+      mapData->OUT[position] = atoi(token);
+    }
+    token = strtok(NULL, delimiter);
+    if (token != NULL)
+    {
+      mapData->duration[position] = atoi(token);
+    }
+  }
+  //free(rest); // Giải phóng bộ nhớ
 }
 
 
@@ -421,7 +435,7 @@ void eventHmiHandler(QUEUE *event)
 
     if (strstr(eventCommandHandler, "Maps"))
     {
-      // getMappingTable(eventCommandHandler, &mappedData);
+      getMappingTable(eventCommandHandler, &mappedData);
       removeQueueCommand(event);
       return;
     }

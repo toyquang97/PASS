@@ -29,6 +29,7 @@
 /* USER CODE BEGIN Includes */
 #include "queue.h"
 #include <ctype.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart1;
@@ -81,6 +82,8 @@ typedef struct __DATA_
 }ioRegister_t;
 
 #define eventCommandHandler (event->hmiControlIO->commandID)
+extern MAPPING_DATA_t mappedData;
+
 /* USER CODE END Private defines */
 
 void MX_USART1_UART_Init(void);

@@ -41,7 +41,7 @@ void insertQueueControlIO(QUEUE *queue, HMI_CONTROL_IO pDataMessage)
 
 void removeQueueCommand(QUEUE *queue)
 {   
-    HMI_CONTROL_IO rev = {0};
+    //HMI_CONTROL_IO rev = {0};
     if(isQueueEmpty(queue))
     {
         return;
@@ -60,7 +60,7 @@ void removeQueueCommand(QUEUE *queue)
 
 void removeQueue(QUEUE *queue)
 {
-    HMI_STRUCT rev = {0};
+    //HMI_STRUCT rev = {0};
     if(isQueueEmpty(queue))
     {
         return;

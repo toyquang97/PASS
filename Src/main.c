@@ -47,7 +47,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-extern void readAllInput(sensor_t *pSensor, inputBoard_t *pInput);
+// extern void readAllInput(sensor_t *pSensor, inputBoard_t *pInput);
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -73,7 +73,7 @@ bool rxOutputManual[OUT_MAX*2]={0};
 bool rxRelayManual[RELAY_MAX*2]={0};
 tickTimer gFlagTimer;
 QUEUE sensorQueueHMI, inputQueueHMI, outputQueueHMI, commandQueue;
-QUEUE sensorQueueIO, inputQueueIO;
+QUEUE sensorQueueIO, inputQueueIO, outputQueueIO;
 MAPPING_DATA_t mappedData;
 extern uint8_t rs232Rx[10];
 extern bool isManualMode;
@@ -144,6 +144,7 @@ int main(void)
   memset(&inputQueueHMI, 0, sizeof(inputQueueHMI));
   memset(&inputQueueIO, 0, sizeof(inputQueueIO));
   memset(&outputQueueHMI, 0, sizeof(outputQueueHMI));
+  memset(&outputQueueIO, 0, sizeof(outputQueueIO));
   memset(&mappedData, 0, sizeof(mappedData));
 
   initializeQueue(&sensorQueueHMI);
@@ -151,6 +152,7 @@ int main(void)
   initializeQueue(&inputQueueHMI);
   initializeQueue(&inputQueueIO);
   initializeQueue(&outputQueueHMI);
+  initializeQueue(&outputQueueIO);
   initializeQueue(&commandQueue);
 
 	HAL_UART_Receive_IT(&huart1, &rxData, 1);
@@ -173,9 +175,10 @@ int main(void)
 
     }
 
+
+    readAllInput(&sensor, &input, &output);
     if(gFlagTimer.Time_5ms)
     { 
-      readAllInput(&sensor, &input);
       gFlagTimer.Time_5ms = 0;
     }
     if(gFlagTimer.Time_10ms)
@@ -184,7 +187,7 @@ int main(void)
       setGPIOMode(isManualMode);
       if (isManualMode == AUTO)
       {
-        
+        controlGPIOByAutoMode(mappedData);
       }
       else
       {
@@ -194,7 +197,7 @@ int main(void)
     }
     if(gFlagTimer.Time_50ms)
     {
-      changeHmiStatus(isManualMode, input, sensor);
+      changeHmiStatus(isManualMode, input, output ,sensor);
       gFlagTimer.Time_50ms = 0;
     }
     if(gFlagTimer.Time_100ms)

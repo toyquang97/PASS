@@ -36,6 +36,9 @@ extern QUEUE inputQueueHMI;
 extern QUEUE outputQueueHMI;
 extern QUEUE sensorQueueHMI;
 extern QUEUE sensorQueueIO;
+extern QUEUE inputQueueIO;
+extern QUEUE outputQueueIO;
+
 // extern sensor_t preSensorCheck;
 // extern inputBoard_t preInputCheck;
 /* USER CODE END Private defines */
@@ -44,9 +47,10 @@ void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 void setGPIOMode(bool setMode);
-void readAllInput(sensor_t *pSensor, inputBoard_t *pInput);
+void readAllInput(sensor_t *pSensor, inputBoard_t *pInput, outputBoard_t *pOutput);
 void controlGPIOByManualMode(bool mode, bool *pInput, bool *pOutput, bool *pRelay);
 void controlGPIOByAutoMode(MAPPING_DATA_t mapData);
+void controlGPIOWritePin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin, bool PinState);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
