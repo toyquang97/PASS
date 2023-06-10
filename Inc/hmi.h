@@ -113,5 +113,6 @@ void nextionSendClick(uint8_t index, setupType_t type, bool active);
 void changeOutputHmi(inputBoard_t input);
 void changeSensorHmi(sensor_t sensor);
 void changeInputHmi(outputBoard_t output);
-void changeHmiStatus(bool mode, inputBoard_t input, sensor_t sensor);
+// void changeHmiStatus(bool mode, inputBoard_t input, sensor_t sensor);
+void changeHmiStatus(bool mode, inputBoard_t input, outputBoard_t output, sensor_t sensor);
 #endif

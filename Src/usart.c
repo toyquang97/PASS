@@ -349,14 +349,20 @@ void convertCharToArrayValue(char *input, bool *pIndex) // generate by chatGPT
   }
   *(pIndex + index) = value;
 }
-
+uint8_t aaa = 0;
+uint8_t bbb = 0;
 void getMappingTable(char *input, MAPPING_DATA_t *mapData)
 {
   const char *delimiter = "^";
+  //printf("%s\n", input);
   //char *rest = strdup("xxxx");
   char *token = strtok(input, delimiter);
   char mappingChar = token[0];
-
+  if (mappingChar == 'B')
+  {
+    aaa = 1;
+  }
+  
   int position = -1;
   for (int i = 0; i < 19; i++)
   {
@@ -366,19 +372,23 @@ void getMappingTable(char *input, MAPPING_DATA_t *mapData)
       break;
     }
   }
-
+  if (position == 0)
+  {
+    bbb = 1;
+  }
+  
   token = strtok(NULL, delimiter);
   if (position >= 0 && position < 19)
   {
     token = strtok(NULL, delimiter);
     if (token != NULL)
     {
-      mapData->IN[position] = atoi(token);
+      mapData->OUT[position] = atoi(token);
     }
     token = strtok(NULL, delimiter);
     if (token != NULL)
     {
-      mapData->OUT[position] = atoi(token);
+      mapData->IN[position] = atoi(token);
     }
     token = strtok(NULL, delimiter);
     if (token != NULL)
@@ -392,7 +402,7 @@ void getMappingTable(char *input, MAPPING_DATA_t *mapData)
 
 void eventHmiHandler(QUEUE *event)
 {
-  if (isQueueEmpty(event))
+  if (isQueueFull(event))
   {
     return;
   }

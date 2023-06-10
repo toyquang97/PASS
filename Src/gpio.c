@@ -166,6 +166,17 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(SS2_GPIO_Port, &GPIO_InitStruct);
 
+#ifdef _TODO_ // todo mapping IO with new design -> set all to OUTPUT
+  for (int i = 1; i < sizeof(outputGPIO) / sizeof(outputGPIO[0]); i++)
+  {
+    GPIO_InitStruct.Pin = outputGPIO[i].pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
+    HAL_GPIO_Init(outputGPIO[i].port, &GPIO_InitStruct);
+    //controlGPIOWritePin(outputGPIO[i].port, outputGPIO[i].pin, GPIO_PIN_SET);
+  }
+#endif
 }
 
 /* USER CODE BEGIN 2 */
@@ -236,16 +247,17 @@ void readAllInput(sensor_t *pSensor, inputBoard_t *pInput, outputBoard_t *pOutpu
     *((bool *)(pInput) + i - 1) = (HAL_GPIO_ReadPin(inputGPIO[i].port, inputGPIO[i].pin));
   }
 
-  // for (int i = 1; i < sizeof(outputGPIO) / sizeof(outputGPIO[0]); i++)
-  // {
-  //   *((bool *)(pOutput) + i - 1) = (HAL_GPIO_ReadPin(outputGPIO[i].port, outputGPIO[i].pin));
-  // }
+  for (int i = 1; i < sizeof(outputGPIO) / sizeof(outputGPIO[0]); i++)
+  {
+    *((bool *)(pOutput) + i - 1) = (HAL_GPIO_ReadPin(outputGPIO[i].port, outputGPIO[i].pin));
+  }
   HAL_Delay(1);
 #endif
   static sensor_t preSensorCheck = {0};
   static inputBoard_t preInputCheck = {0};
-  // static outputBoard_t preOutputCheck = {0};
+  static outputBoard_t preOutputCheck = {0};
   HMI_STRUCT dataCheck = {0};
+
   for (int i = 0; i < SENSORMAX - 1; i++)
   {
     if (*((bool *)(&preSensorCheck) + i) != *((bool *)(pSensor) + i))
@@ -270,7 +282,6 @@ void readAllInput(sensor_t *pSensor, inputBoard_t *pInput, outputBoard_t *pOutpu
   {
     if (*((bool *)(&preInputCheck) + i) != *((bool *)(pInput) + i))
     {
-
       dataCheck.active = *((bool *)(pInput) + i);
       dataCheck.index = (i + 1);
       if (isQueueFull(&inputQueueHMI))
@@ -286,41 +297,52 @@ void readAllInput(sensor_t *pSensor, inputBoard_t *pInput, outputBoard_t *pOutpu
     }
   }
 
-  // for (int i = 0; i < OUT_MAX - 1; i++)
-  // {
-  //   if (*((bool *)(&preOutputCheck) + i) != *((bool *)(pOutput) + i))
-  //   {
-
-  //     dataCheck.active = *((bool *)(pOutput) + i);
-  //     dataCheck.index = (i + 1);
-  //     if (isQueueFull(&outputQueueHMI))
-  //     {
-  //       return;
-  //     }
-  //     else
-  //     {
-  //       insertQueue(&outputQueueHMI, dataCheck);
-  //       insertQueue(&outputQueueIO, dataCheck);
-  //       *((bool *)(&preOutputCheck) + i) = *((bool *)(pOutput) + i);
-  //     }
-  //   }
-  // }
+  for (int i = 0; i < OUT_MAX - 1; i++)
+  {
+    if (*((bool *)(&preOutputCheck) + i) != *((bool *)(pOutput) + i))
+    {
+      dataCheck.active = *((bool *)(pOutput) + i);
+      dataCheck.index = (i + 1);
+      if (isQueueFull(&outputQueueHMI))
+      {
+        return;
+      }
+      else
+      {
+        insertQueue(&outputQueueHMI, dataCheck);
+        insertQueue(&outputQueueIO, dataCheck);
+        *((bool *)(&preOutputCheck) + i) = *((bool *)(pOutput) + i);
+      }
+    }
+  }
 }
 
+uint32_t isTuringOn[20] = {0}; // 0 not turn ON, 1 is turned oN
 void controlGPIOByAutoMode(MAPPING_DATA_t mapData)
 {
   static MAPPING_DATA_t mappingDataStatus = {0};
-  static uint32_t isTuringOn[20] = {0}; // 0 not turn ON, 1 is turned oN
+  HMI_STRUCT dataCheck = {0};
 
   if (!isQueueEmpty(&sensorQueueIO))
   {
-    if ((sensorQueueIO.nodes[0].active) && (isTuringOn[sensorQueueIO.nodes[0].index] == 0))
+    if ((sensorQueueIO.nodes[0].active) && (isTuringOn[INDEX_INPUT_GPIO] == 0))
     {
-      isTuringOn[sensorQueueIO.nodes[0].index] = 1;
-      if (INDEX_INPUT_GPIO || INDEX_OUTPUT_GPIO) // mapping data != 0
+      isTuringOn[INDEX_INPUT_GPIO] = 1;
+      if (INDEX_INPUT_GPIO) // mapping data != 0
       {
-        controlGPIOWritePin(inputGPIO[INDEX_INPUT_GPIO].port, inputGPIO[INDEX_INPUT_GPIO].pin, !GPIO_PIN_SET);
-        controlGPIOWritePin(outputGPIO[INDEX_OUTPUT_GPIO].port, outputGPIO[INDEX_OUTPUT_GPIO].pin, !GPIO_PIN_SET);
+        // controlGPIOWritePin(inputGPIO[INDEX_INPUT_GPIO].port, inputGPIO[INDEX_INPUT_GPIO].pin, !GPIO_PIN_SET);
+        // Change mode for that pin to OUTPUT
+        controlGPIOWritePin(outputGPIO[INDEX_INPUT_GPIO].port, outputGPIO[INDEX_INPUT_GPIO].pin, !GPIO_PIN_SET);
+        dataCheck.active = 1;
+        dataCheck.index = INDEX_INPUT_GPIO;
+        if (isQueueFull(&outputQueueIO))
+        {
+          return;
+        }
+        else
+        {
+          insertQueue(&outputQueueIO, dataCheck);
+        }
       }
 
       if (mapData.duration[sensorQueueIO.nodes[0].index] != 0)

@@ -55,12 +55,12 @@ bool nextionSendInput(uint8_t index, bool active)
     index-=1;
     int len;
 
-    len = sprintf (buf, "pgIODisplay.bIN%s.bco=%s", indexDefine[index], active ? "WHITE" : "GREEN");
+    len = sprintf (buf, "pgIODisplay.bIN%s.bco=%s", indexDefine[index], active ? "GREEN" : "WHITE");
 	if(sendUartHmiData(&HMI_UART, (uint8_t *)buf, len) == false)
 	{
 		return false;
 	}
-    len = sprintf (buf, "pgIODisplay.bIN%s.txt=%s %s", indexDefine[index], inputDefineText[index], active ? "ON" : "OFF");
+    len = sprintf (buf, "pgIODisplay.bIN%s.txt=%c%s %s%c", indexDefine[index], '"',inputDefineText[index], active ? "ON" : "OFF", '"');
 	if(sendUartHmiData(&HMI_UART, (uint8_t *)buf, len) == false)
 	{
 		return false;
@@ -182,7 +182,7 @@ void resetStateHmiAfterChangeMode(void)
 
 }
 
-void changeHmiStatus(bool mode, inputBoard_t input, sensor_t sensor)
+void changeHmiStatus(bool mode, inputBoard_t input, outputBoard_t output, sensor_t sensor)
 {
 	static bool preMode = AUTO;
 	if (preMode != mode)
@@ -196,6 +196,7 @@ void changeHmiStatus(bool mode, inputBoard_t input, sensor_t sensor)
 		{
 			changeSensorHmi(sensor);
 			changeOutputHmi(input);
+			changeInputHmi(output);
 		}
 	}
 }
