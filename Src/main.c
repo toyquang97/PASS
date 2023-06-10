@@ -135,6 +135,7 @@ int main(void)
   MX_TIM7_Init();
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
   memset(&input,  0, sizeof(input));
   memset(&output, 0, sizeof(output));
