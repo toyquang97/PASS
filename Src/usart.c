@@ -26,7 +26,7 @@ char preRxBufferHMI[MAX_LENGTH];
 uint8_t rxData = 0;
 uint8_t rxDataComm = 0;
 uint8_t countRxByte = 0;
-bool isManualMode = AUTO;
+bool hmiSetMode = AUTO;
 uint8_t instrumentType = BLACKBELT_PRO_IO_A_ONLY;
 bool isMaster = 0;
 ioRegister_t rxIOdata;
@@ -349,32 +349,22 @@ void convertCharToArrayValue(char *input, bool *pIndex) // generate by chatGPT
   }
   *(pIndex + index) = value;
 }
-uint8_t aaa = 0;
-uint8_t bbb = 0;
+
 void getMappingTable(char *input, MAPPING_DATA_t *mapData)
 {
   const char *delimiter = "^";
-  //printf("%s\n", input);
   //char *rest = strdup("xxxx");
   char *token = strtok(input, delimiter);
   char mappingChar = token[0];
-  if (mappingChar == 'B')
-  {
-    aaa = 1;
-  }
   
   int position = -1;
-  for (int i = 0; i < 19; i++)
+  for (int i = 1; i < 19; i++)
   {
-    if (mappingChar == (char)sensorMappingCommand[i])
+    if (mappingChar == (char)sensorMappingCommand[i - 1])
     {
       position = i;
       break;
     }
-  }
-  if (position == 0)
-  {
-    bbb = 1;
   }
   
   token = strtok(NULL, delimiter);
@@ -410,7 +400,7 @@ void eventHmiHandler(QUEUE *event)
   {
     if (strstr(eventCommandHandler, "Click="))
     {
-      isManualMode = convertCharToNumber(eventCommandHandler);
+      hmiSetMode = convertCharToNumber(eventCommandHandler);
       removeQueueCommand(event);
       return;
     }

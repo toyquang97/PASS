@@ -49,6 +49,36 @@ bool nextionSendOutput(uint8_t index,bool active)
 	return true;
 }
 
+bool nextionSendRelay(uint8_t index,bool active)
+{
+	char buf[50];
+    index-=1;
+    int len;
+
+    len = sprintf (buf, "pgIODisplay.bRelay%s.bco=%s", indexDefine[index], active ? "RED" : "WHITE");
+	if(sendUartHmiData(&HMI_UART, (uint8_t *)buf, len) == false)
+	{
+		return false;
+	}
+    len = sprintf (buf, "pgIODisplay.bRelay%s.pco=%s", indexDefine[index], active ? "WHITE" : "BLACK");
+	if(sendUartHmiData(&HMI_UART, (uint8_t *)buf, len) == false)
+	{
+		return false;
+	}
+    len = sprintf (buf, "pgIODisplay.bRelay%s.txt=%c%s %s%c", indexDefine[index], '"',relayDefineText[index], active ? "ON" : "OFF", '"');
+	if(sendUartHmiData(&HMI_UART, (uint8_t *)buf, len) == false)
+	{
+		return false;
+	}
+    len = sprintf (buf, "g_.vaR%s.val=%c", indexDefine[index], active ? '1' : '0');
+	if(sendUartHmiData(&HMI_UART, (uint8_t *)buf, len) == false)
+	{
+		return false;
+	}
+	return true;
+}
+
+
 bool nextionSendInput(uint8_t index, bool active)
 {
 	char buf[50];
@@ -161,6 +191,22 @@ void changeInputHmi(outputBoard_t output)
 			__NOP();__NOP();__NOP();__NOP();__NOP();
 			removeQueue(&outputQueueHMI);
 		}
+	}
+}
+
+void changeHMIStatusByAutoMode(uint8_t type, uint8_t index, bool active)
+{
+	if (type == 1)
+	{
+		nextionSendInput(index, active);
+	}
+	else if (type == 2)
+	{
+		nextionSendOutput(index, active);
+	}
+	else if (type == 3)
+	{
+		nextionSendRelay(index, active);
 	}
 }
 

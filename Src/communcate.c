@@ -47,9 +47,9 @@ void masterReceivedData(uint8_t *pData)
 
 }
 
-void masterSendData(uint8_t *pData, bool isManualMode)
+void masterSendData(uint8_t *pData, bool hmiSetMode)
 {
-    if (isManualMode == AUTO)
+    if (hmiSetMode == AUTO)
     {
         
     }

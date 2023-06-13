@@ -10,7 +10,8 @@ extern UART_HandleTypeDef huart3;
 extern QUEUE inputQueueHMI;
 extern QUEUE outputQueueHMI;
 extern QUEUE sensorQueueHMI;
-extern bool isManualMode;
+extern QUEUE outputQueueIO;
+extern bool hmiSetMode;
 
 
 typedef enum _PERIPHERAL_
@@ -106,13 +107,24 @@ static const char *outputDefineText[]=
     "Out 17",
     "Out 18",
 };
+
+static const char *relayDefineText[]=
+{
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+};
+
 bool nextionSendOutput(uint8_t index,bool active);
 bool nextionSendSensor(uint8_t index, bool active);
 bool nextionSendInput(uint8_t index, bool active);
+bool nextionSendRelay(uint8_t index,bool active);
 void nextionSendClick(uint8_t index, setupType_t type, bool active);
 void changeOutputHmi(inputBoard_t input);
 void changeSensorHmi(sensor_t sensor);
 void changeInputHmi(outputBoard_t output);
 // void changeHmiStatus(bool mode, inputBoard_t input, sensor_t sensor);
 void changeHmiStatus(bool mode, inputBoard_t input, outputBoard_t output, sensor_t sensor);
+void changeHMIStatusByAutoMode(uint8_t type, uint8_t index, bool active);
 #endif

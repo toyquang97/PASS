@@ -76,7 +76,8 @@ QUEUE sensorQueueHMI, inputQueueHMI, outputQueueHMI, commandQueue;
 QUEUE sensorQueueIO, inputQueueIO, outputQueueIO;
 MAPPING_DATA_t mappedData;
 extern uint8_t rs232Rx[10];
-extern bool isManualMode;
+extern bool hmiSetMode;
+bool isGPIOTuringOn[20] = {0}; // 0 not turn ON, 1 is turned oN
 
 #if 1
 #if defined(__GNUC__)
@@ -159,6 +160,7 @@ int main(void)
 	HAL_UART_Receive_IT(&huart1, &rxData, 1);
 	HAL_UART_Receive_IT(&huart2, &rxDataComm, 1);
 	HAL_UART_Receive_IT(&huart3, rs232Rx, 10);
+	HAL_TIM_Base_Start_IT(&htim4);
   HAL_TIM_Base_Start_IT(&htim5);
   HAL_TIM_Base_Start_IT(&htim6);
   HAL_TIM_Base_Start_IT(&htim7);
@@ -171,39 +173,31 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    if(HAL_GPIO_ReadPin(BUTTON_GPIO_Port,BUTTON_Pin) == GPIO_PIN_RESET)
-    {
-
-    }
-
-
     readAllInput(&sensor, &input, &output);
-    if(gFlagTimer.Time_5ms)
+
+    if(gFlagTimer.Timer_1ms)
     { 
-      gFlagTimer.Time_5ms = 0;
+      turnOffGpioByAutoMode(hmiSetMode, &mappedData);
+      gFlagTimer.Timer_1ms = 0;
     }
     if(gFlagTimer.Time_10ms)
     {
       eventHmiHandler(&commandQueue);
-      setGPIOMode(isManualMode);
-      if (isManualMode == AUTO)
+      setGPIOMode(hmiSetMode);
+      if (hmiSetMode == AUTO)
       {
         controlGPIOByAutoMode(mappedData);
       }
       else
       {
-        controlGPIOByManualMode(isManualMode, rxInputManual, rxOutputManual, rxRelayManual);
+        controlGPIOByManualMode(hmiSetMode, rxInputManual, rxOutputManual, rxRelayManual);
       }
       gFlagTimer.Time_10ms = 0;
     }
     if(gFlagTimer.Time_50ms)
     {
-      changeHmiStatus(isManualMode, input, output ,sensor);
+      changeHmiStatus(hmiSetMode, input, output ,sensor);
       gFlagTimer.Time_50ms = 0;
-    }
-    if(gFlagTimer.Time_100ms)
-    {
-      gFlagTimer.Time_100ms = 0;
     }
     if(gFlagTimer.Time_1000ms)
     {
