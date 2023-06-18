@@ -58,10 +58,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim->Instance == htim4.Instance) //1ms
   {
-    gFlagTimer.Timer_1ms = 1;
+    gFlagTimer.Time_1ms = 1;
   }
   else if (htim->Instance == htim5.Instance) // 100ms
-  //  if (htim->Instance == htim5.Instance) // 100ms
   {
     gFlagTimer.Time_100ms = 1;
   }

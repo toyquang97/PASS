@@ -243,7 +243,7 @@ enum sensorIndex
 
 typedef struct timer
 {
-	uint8_t Timer_1ms : 1;	// 1ms 
+	uint8_t Time_1ms : 1;	// 1ms 
 	uint8_t Time_5ms : 1;	// 5ms 
 	uint8_t Time_10ms : 1;	// 10ms 
 	uint8_t Time_50ms : 1;	// 50ms 
@@ -264,14 +264,16 @@ enum settingMode
 
 typedef struct __MAPPING_
 {
-  uint8_t IN[20];
-  uint8_t OUT[20];
-  uint32_t duration[20];
-  uint32_t countTime[20];
+  uint8_t IN[21];
+  uint8_t OUT[21];
+  uint32_t duration[21];
+  uint32_t countTime[21];
 }MAPPING_DATA_t;
 
 #define INDEX_INPUT_GPIO  (mapData.IN[sensorQueueIO.nodes[0].index])
+#define INDEX_INPUT_GPIO_P  (mapData->IN[i])
 #define INDEX_OUTPUT_GPIO (mapData.OUT[sensorQueueIO.nodes[0].index])
+#define INDEX_OUTPUT_GPIO_P (mapData->OUT[i])
 
 #define OUTPUT GPIO_MODE_OUTPUT_PP
 #define INPUT GPIO_MODE_INPUT

@@ -39,7 +39,7 @@ extern QUEUE sensorQueueHMI;
 extern QUEUE sensorQueueIO;
 extern QUEUE inputQueueIO;
 extern QUEUE outputQueueIO;
-extern bool isGPIOTuringOn[20];
+extern bool isGPIOTuringOn[21];
 
 // extern sensor_t preSensorCheck;
 // extern inputBoard_t preInputCheck;

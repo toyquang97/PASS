@@ -77,7 +77,7 @@ QUEUE sensorQueueIO, inputQueueIO, outputQueueIO;
 MAPPING_DATA_t mappedData;
 extern uint8_t rs232Rx[10];
 extern bool hmiSetMode;
-bool isGPIOTuringOn[20] = {0}; // 0 not turn ON, 1 is turned oN
+bool isGPIOTuringOn[21] = {0}; // 0 not turn ON, 1 is turned oN, IN1->9, OUT1->9, RL1->2
 
 #if 1
 #if defined(__GNUC__)
@@ -173,12 +173,16 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    readAllInput(&sensor, &input, &output);
 
-    if(gFlagTimer.Timer_1ms)
+    if(gFlagTimer.Time_1ms)
     { 
       turnOffGpioByAutoMode(hmiSetMode, &mappedData);
-      gFlagTimer.Timer_1ms = 0;
+      gFlagTimer.Time_1ms = 0;
+    }
+    if(gFlagTimer.Time_5ms)
+    { 
+      readAllInput(&sensor, &input, &output);
+      gFlagTimer.Time_5ms = 0;
     }
     if(gFlagTimer.Time_10ms)
     {

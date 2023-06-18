@@ -35,7 +35,7 @@ extern bool rxOutputManual[];
 extern bool rxRelayManual[];
 uint8_t sendData2Board[22];
 extern QUEUE commandQueue;
-char sensorMappingCommand[] ={'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I','J','K','M','N','O','P', 'Z', 'U', 'X', 'V'};
+char sensorMappingCommand[17] ={'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I','J','K', 'L', 'M','N','O','P','R'};
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;
@@ -327,13 +327,16 @@ int convertCharToNumber(char *index) // generate by chatGPT
 
 void convertCharToArrayValue(char *input, bool *pIndex) // generate by chatGPT
 {
-  char *token = strtok(input, "="); // seperate string by "="
-  int index;
+  char rest[30] = {0};
+  strcpy(rest, input);
+  int index = 0;
+  char *token = strtok(rest, "="); // seperate string by "="
+
 	bool value;
 
   if (token != NULL)
   {
-    if (strlen(input) > 3)
+    if (strlen(rest) > 3)
     {
       index = atoi(token + 3); // convert token to INT, skip "OUT", "REL"
     }
@@ -347,18 +350,18 @@ void convertCharToArrayValue(char *input, bool *pIndex) // generate by chatGPT
       value = (bool)atoi(token); // CONVERT remain token to INT
     }
   }
-  *(pIndex + index) = value;
+  *(pIndex + index) = (bool)value;
 }
 
 void getMappingTable(char *input, MAPPING_DATA_t *mapData)
 {
+  char rest[30] = {0};
+  strcpy(rest, input);
   const char *delimiter = "^";
-  //char *rest = strdup("xxxx");
-  char *token = strtok(input, delimiter);
+  char *token = strtok(rest, delimiter);
   char mappingChar = token[0];
-  
   int position = -1;
-  for (int i = 1; i < 19; i++)
+  for (int i = 1; i <= sizeof(sensorMappingCommand); i++)
   {
     if (mappingChar == (char)sensorMappingCommand[i - 1])
     {
@@ -366,14 +369,31 @@ void getMappingTable(char *input, MAPPING_DATA_t *mapData)
       break;
     }
   }
+
+  if (position <= 0)
+  {
+    return;
+  }
+  
+  if (position == 17) // Get character 'R'
+  {
+    position += (atoi(&token[1]) - 1);
+  }
   
   token = strtok(NULL, delimiter);
-  if (position >= 0 && position < 19)
+  if (position > 0 && position < 21)
   {
     token = strtok(NULL, delimiter);
     if (token != NULL)
     {
-      mapData->OUT[position] = atoi(token);
+      if (token[0] == 'R')
+      {
+        mapData->OUT[position] = 18 + atoi(&token[1]); // when set the inout or output map to Relay
+      }
+      else
+      {
+        mapData->OUT[position] = atoi(token);
+      }
     }
     token = strtok(NULL, delimiter);
     if (token != NULL)
@@ -386,7 +406,6 @@ void getMappingTable(char *input, MAPPING_DATA_t *mapData)
       mapData->duration[position] = atoi(token);
     }
   }
-  //free(rest); // Giải phóng bộ nhớ
 }
 
 
@@ -414,21 +433,21 @@ void eventHmiHandler(QUEUE *event)
 
     if (strstr(eventCommandHandler, "IN"))
     {
-      convertCharToArrayValue(eventCommandHandler, rxInputManual);
+      convertCharToArrayValue(eventCommandHandler, (bool *)rxInputManual);
       removeQueueCommand(event);
       return;
     }
 
     if (strstr(eventCommandHandler, "OUT"))
     {
-      convertCharToArrayValue(eventCommandHandler, rxOutputManual);
+      convertCharToArrayValue(eventCommandHandler, (bool *)rxOutputManual);
       removeQueueCommand(event);
       return;
     }
 
     if (strstr(eventCommandHandler, "REL"))
     {
-      convertCharToArrayValue(eventCommandHandler, rxRelayManual);
+      convertCharToArrayValue(eventCommandHandler, (bool *)rxRelayManual);
       removeQueueCommand(event);
       return;
     }
