@@ -334,7 +334,7 @@ void readAllInput(sensor_t *pSensor, inputBoard_t *pInput, outputBoard_t *pOutpu
       else
       {
         insertQueue(&outputQueueHMI, dataCheck);
-        //insertQueue(&outputQueueIO, dataCheck);
+        insertQueue(&outputQueueIO, dataCheck);
         *((bool *)(&preOutputCheck) + i) = *((bool *)(pOutput) + i);
       }
     }
@@ -348,14 +348,14 @@ void controlGPIOByAutoMode(MAPPING_DATA_t mapData)
 
   if (!isQueueEmpty(&sensorQueueIO))
   {
-    if (INDEX_INPUT_GPIO)
+    if (INDEX_INPUT_GPIO(sensorQueueIO))
     {
-      indexGpioCheck = INDEX_INPUT_GPIO; // 1 mean mapped with input
+      indexGpioCheck = INDEX_INPUT_GPIO(sensorQueueIO); // 1 mean mapped with input
       conditionWritePin = 1;
     }
-    else if (INDEX_OUTPUT_GPIO)
+    else if (INDEX_OUTPUT_GPIO(sensorQueueIO))
     {
-      indexGpioCheck = INDEX_OUTPUT_GPIO; // 2 mean mapped with output or relay
+      indexGpioCheck = INDEX_OUTPUT_GPIO(sensorQueueIO); // 2 mean mapped with output or relay
       if (indexGpioCheck < 19)
       {
         conditionWritePin = 2;        
@@ -371,7 +371,8 @@ void controlGPIOByAutoMode(MAPPING_DATA_t mapData)
       if (!conditionWritePin)
       {
         removeQueue(&sensorQueueIO);
-        return;
+        // return;
+        goto nextCheck;
       }
     
       // if (indexGpioCheck && isGPIOTuringOn[indexGpioCheck] == 0) // mapping data != 0
@@ -392,7 +393,7 @@ void controlGPIOByAutoMode(MAPPING_DATA_t mapData)
         }
         else if (conditionWritePin == 3) // relay
         {
-          indexGpioCheck = (INDEX_OUTPUT_GPIO - 18);
+          indexGpioCheck = (INDEX_OUTPUT_GPIO(sensorQueueIO) - 18);
           controlGPIOWritePin(relayGPIO[indexGpioCheck].port, relayGPIO[indexGpioCheck].pin, GPIO_PIN_RESET); // relay set logic by mosfet
         }
         changeHMIStatusByAutoMode(conditionWritePin,indexGpioCheck, 1);
@@ -417,7 +418,7 @@ void controlGPIOByAutoMode(MAPPING_DATA_t mapData)
         }
         else if (conditionWritePin == 3) // relay
         {
-          indexGpioCheck = (INDEX_OUTPUT_GPIO - 18);
+          indexGpioCheck = (INDEX_OUTPUT_GPIO(sensorQueueIO) - 18);
           controlGPIOWritePin(relayGPIO[indexGpioCheck].port, relayGPIO[indexGpioCheck].pin, GPIO_PIN_SET); // relay set logic by mosfet
         }
         changeHMIStatusByAutoMode(conditionWritePin,indexGpioCheck, 0);
@@ -426,75 +427,63 @@ void controlGPIOByAutoMode(MAPPING_DATA_t mapData)
     removeQueue(&sensorQueueIO);
   }
 
-#if 0
- if (!isQueueEmpty(&inputQueueIO)) //output from instrument
+nextCheck:
+  if (!isQueueEmpty(&inputQueueIO)) //output from instrument
   {
-    if (INDEX_INPUT_GPIO)
+    for (int i = 1; i < 3; i++)
     {
-      indexGpioCheck = INDEX_INPUT_GPIO; // 1 mean mapped with input
-      conditionWritePin = 1;
-    }
-    else if (INDEX_OUTPUT_GPIO)
-    {
-      indexGpioCheck = INDEX_OUTPUT_GPIO; // 2 mean mapped with output
-      conditionWritePin = 2;
-    }
-    // else if ()
-    // {
-      
-    // }
-    
-    if (sensorQueueIO.nodes[0].active)
-    {
-      if (!conditionWritePin)
+      if (inputQueueIO.nodes[0].index == mapData.OUT[16 + i])
       {
-        removeQueue(&sensorQueueIO);
-        return;
-      }
-    
-      if (indexGpioCheck && isGPIOTuringOn[indexGpioCheck] == 0) // mapping data != 0
-      {
-        isGPIOTuringOn[indexGpioCheck] = 1;
-        if (conditionWritePin == 1) // input pins
+        if (inputQueueIO.nodes[0].active)
         {
-          // set output before write
-          controlGPIOSetMode(inputGPIO[indexGpioCheck].port, inputGPIO[indexGpioCheck].pin, OUTPUT);
-          controlGPIOWritePin(inputGPIO[indexGpioCheck].port, inputGPIO[indexGpioCheck].pin, GPIO_PIN_SET);
+          isGPIOTuringOn[16 + i] = 1;
+          controlGPIOWritePin(relayGPIO[i].port, relayGPIO[i].pin, GPIO_PIN_RESET); // relay set logic by mosfet
+          changeHMIStatusByAutoMode(3, i, 1);
         }
-        else if (conditionWritePin == 2) // output pins
+        else if(!inputQueueIO.nodes[0].active && isGPIOTuringOn[16 + i] == 1)
         {
-          // set output before write
-          controlGPIOSetMode(outputGPIO[indexGpioCheck].port, outputGPIO[indexGpioCheck].pin, OUTPUT);
-          controlGPIOWritePin(outputGPIO[indexGpioCheck].port, outputGPIO[indexGpioCheck].pin, GPIO_PIN_SET);
+          if (mapData.duration[16 + i] == 0)
+          {
+            isGPIOTuringOn[16 + i] = 0;
+            controlGPIOWritePin(relayGPIO[i].port, relayGPIO[i].pin, GPIO_PIN_SET); // relay set logic by mosfet
+            changeHMIStatusByAutoMode(3, i, 0);
+          }
         }
-        else if (conditionWritePin == 3) // relay
-        {
-          //controlGPIOWritePin(relayGPIO[indexGpioCheck].port, relayGPIO[indexGpioCheck].pin, GPIO_PIN_SET);
-        }
-        changeHMIStatusByAutoMode(conditionWritePin,indexGpioCheck, 1);
-
-      }
-   
-    }
-    else if (!sensorQueueIO.nodes[0].active && isGPIOTuringOn[sensorQueueIO.nodes[0].index] == 1)
-    {
-      if (mapData.duration[sensorQueueIO.nodes[0].index] == 0)
-      {
-        controlGPIOSetMode(inputGPIO[indexGpioCheck].port, inputGPIO[indexGpioCheck].pin, INPUT);
-        controlGPIOSetMode(outputGPIO[indexGpioCheck].port, outputGPIO[indexGpioCheck].pin, INPUT);
-        changeHMIStatusByAutoMode(conditionWritePin,indexGpioCheck, 0);
-        isGPIOTuringOn[sensorQueueIO.nodes[0].index] = 0;
       }
     }
-    removeQueue(&sensorQueueIO);
+    removeQueue(&inputQueueIO);
   }
-  #endif
 
+  if (!isQueueEmpty(&outputQueueIO))
+  {
+    for (int i = 1; i < 3; i++)
+    {
+      if (outputQueueIO.nodes[0].index == mapData.IN[16 + i])
+      {
+        if (outputQueueIO.nodes[0].active)
+        {
+          isGPIOTuringOn[16 + i] = 1;
+          controlGPIOWritePin(relayGPIO[i].port, relayGPIO[i].pin, GPIO_PIN_RESET); // relay set logic by mosfet
+          changeHMIStatusByAutoMode(3, i, 1);
+        }
+        else if(!outputQueueIO.nodes[0].active && isGPIOTuringOn[16 + i] == 1)
+        {
+          if (mapData.duration[16 + i] == 0)
+          {
+            isGPIOTuringOn[16 + i] = 0;
+            controlGPIOWritePin(relayGPIO[i].port, relayGPIO[i].pin, GPIO_PIN_SET); // relay set logic by mosfet
+            changeHMIStatusByAutoMode(3, i, 0);
+          }
+        }
+      }
+    }
+    removeQueue(&outputQueueIO);
+  }
 }
 
 void turnOffGpioByAutoMode(bool mode, MAPPING_DATA_t *mapData)
 {
-  for (int i = 0; i < 20; i++)
+  for (int i = 1; i < 21; i++)
   {
     if (isGPIOTuringOn[i] == 1)
     {
@@ -522,10 +511,23 @@ void turnOffGpioByAutoMode(bool mode, MAPPING_DATA_t *mapData)
           else
           {
             controlGPIOWritePin(relayGPIO[mapData->OUT[i] - 18].port, relayGPIO[mapData->OUT[i] - 18].pin, GPIO_PIN_SET);
-            changeHMIStatusByAutoMode(3, (mapData->OUT[i] - 18), 0);          
+            changeHMIStatusByAutoMode(3, (mapData->OUT[i] - 18), 0);        
           }
-
         }
+        if (i > 16) // condition for relay mapping
+        {
+          if (i == 17)
+          {
+            controlGPIOWritePin(relayGPIO[1].port, relayGPIO[1].pin, GPIO_PIN_SET);
+            changeHMIStatusByAutoMode(3, 1, 0);        
+          }
+          else if (i == 18)
+          {
+            controlGPIOWritePin(relayGPIO[2].port, relayGPIO[2].pin, GPIO_PIN_SET);
+            changeHMIStatusByAutoMode(3, 2, 0);        
+          }
+        }
+        
         mapData->countTime[i] = 0;
         isGPIOTuringOn[i] = 0;
       }

@@ -25,13 +25,6 @@ if manual mode -> salve wil do not send any data to master
 // Slave send
 
 
-
-
-
-bool isSlaveConnect = 0;
-char checkSlave[5] = "CHECK"
-
-
 void convertFrameToNumber(void)
 {
     

@@ -270,9 +270,9 @@ typedef struct __MAPPING_
   uint32_t countTime[21];
 }MAPPING_DATA_t;
 
-#define INDEX_INPUT_GPIO  (mapData.IN[sensorQueueIO.nodes[0].index])
+#define INDEX_INPUT_GPIO(queue)  (mapData.IN[queue.nodes[0].index])
 #define INDEX_INPUT_GPIO_P  (mapData->IN[i])
-#define INDEX_OUTPUT_GPIO (mapData.OUT[sensorQueueIO.nodes[0].index])
+#define INDEX_OUTPUT_GPIO(queue) (mapData.OUT[queue.nodes[0].index])
 #define INDEX_OUTPUT_GPIO_P (mapData->OUT[i])
 
 #define OUTPUT GPIO_MODE_OUTPUT_PP
