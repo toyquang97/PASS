@@ -46,6 +46,9 @@ extern "C" {
 #define HMI_UART huart1
 #define SLAVE_UART huart2
 #define RS232_UART huart3
+
+#define TIME_OUT_SLAVE 500 // -> 500ms if can't rev datta
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -260,6 +263,14 @@ enum settingMode
 {
   MANUAL = 0,
   AUTO,
+};
+
+
+enum __IS_SLAVE_
+{
+    SLAVE_NO_CONNECTED = 0,
+    SLAVE_JUST_CONNECTED,
+    SLAVE_CONNECTING,
 };
 
 typedef struct __MAPPING_

@@ -36,7 +36,7 @@ void MX_TIM4_Init(void)
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
   htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 799;
+  htim4.Init.Prescaler = 6399;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim4.Init.Period = 9;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -65,7 +65,7 @@ void MX_TIM5_Init(void)
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
   htim5.Instance = TIM5;
-  htim5.Init.Prescaler = 399;
+  htim5.Init.Prescaler = 3199;
   htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim5.Init.Period = 1999;
   htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -93,7 +93,7 @@ void MX_TIM6_Init(void)
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
   htim6.Instance = TIM6;
-  htim6.Init.Prescaler = 799;
+  htim6.Init.Prescaler = 6399;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim6.Init.Period = 49;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -115,7 +115,7 @@ void MX_TIM7_Init(void)
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
   htim7.Instance = TIM7;
-  htim7.Init.Prescaler = 399;
+  htim7.Init.Prescaler = 3199;
   htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim7.Init.Period = 19999;
   htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;

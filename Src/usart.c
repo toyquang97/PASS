@@ -21,8 +21,8 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-char rxBufferHMI[MAX_LENGTH];
-char preRxBufferHMI[MAX_LENGTH];
+char rxBufferHMI[MAX_LENGTH] = {0};
+char preRxBufferHMI[MAX_LENGTH] = {0};
 uint8_t rxData = 0;
 uint8_t rxDataComm = 0;
 uint8_t countRxByte = 0;
@@ -67,7 +67,7 @@ void MX_USART2_UART_Init(void)
 {
 
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 9600;
+  huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;

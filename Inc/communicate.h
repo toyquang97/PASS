@@ -2,11 +2,18 @@
 #define __COMMUNICATE_H
 
 #include "main.h"
+#include "usart.h"
+#include "tim.h"
+#include "gpio.h"
 
-enum __IS_SLAVE_
-{
-    SLAVE_NO_CONNECTED,
-    SLAVE_CONNECTED,
-};
+extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart2;
+extern UART_HandleTypeDef huart3;
+
+extern MAPPING_DATA_t mappedData;
+extern uint8_t slaveStatus;
+
+bool checkSlaveStatus(uint8_t *pStatus, uint32_t *pTimeout);
+void masterSendMappedData(MAPPING_DATA_t mapData);
 
 #endif

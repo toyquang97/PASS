@@ -2,6 +2,7 @@
 #include "usart.h"
 #include "tim.h"
 #include "gpio.h"
+#include <ctype.h>
 
 extern inputBoard_t input;
 extern outputBoard_t output;
@@ -13,9 +14,15 @@ extern char preRxBufferHMI[MAX_LENGTH];
 extern uint8_t rxData;
 extern uint8_t rxDataComm;
 extern uint8_t countRxByte;
+extern uint8_t slaveStatus;
+
+uint32_t timeOutSlave = 0;
+
 uint8_t count = 0;
 uint8_t count1 = 0;
 uint8_t rs232Rx[10];
+char rxDataSlave[6];
+bool rxFirstChar = 0;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -35,17 +42,28 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       }
       memset(preRxBufferHMI, 0, sizeof(preRxBufferHMI));
       getEventStatusHMi(rxBufferHMI);
+      rxFirstChar = false;
     }
     else
     {
-      preRxBufferHMI[countRxByte] = rxData;
-      countRxByte++;
+      if (isalpha(rxData) && (countRxByte == 0))
+      {
+        rxFirstChar = true;
+      }
+      if (rxFirstChar)
+      {
+				if(rxData < 0x7E)
+				{
+        preRxBufferHMI[countRxByte] = rxData;
+        countRxByte++;
+				}
+      }
     }
   }
   else if (huart->Instance == huart2.Instance) //Communicate with slave board
   {
-    HAL_UART_Receive_IT(&huart2, &rxDataComm, 1);
-    
+    HAL_UART_Receive_IT(&huart2, rxDataSlave, 1);
+    timeOutSlave = HAL_GetTick();
   }
   else if (huart->Instance == huart3.Instance) // communaticate with RS232
   {

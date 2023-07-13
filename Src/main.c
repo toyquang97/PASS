@@ -28,6 +28,7 @@
 /* USER CODE BEGIN Includes */
 #include "hmi.h"
 #include "queue.h"
+#include "communicate.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -78,8 +79,10 @@ MAPPING_DATA_t mappedData;
 extern uint8_t rs232Rx[10];
 extern bool hmiSetMode;
 bool isGPIOTuringOn[21] = {0}; // 0 not turn ON, 1 is turned oN, IN1->9, OUT1->9, RL1->2
-
-#if 1
+uint8_t slaveStatus = SLAVE_NO_CONNECTED;
+extern uint32_t timeOutSlave;
+bool allowToSendMapData = 0;
+#if 0
 #if defined(__GNUC__)
 int _write(int fd, char * ptr, int len) { 
   HAL_UART_Transmit( &huart2, (uint8_t * ) ptr, len, HAL_MAX_DELAY);
@@ -203,9 +206,18 @@ int main(void)
       changeHmiStatus(hmiSetMode, input, output ,sensor);
       gFlagTimer.Time_50ms = 0;
     }
+    if(gFlagTimer.Time_100ms)
+    {
+      allowToSendMapData = checkSlaveStatus(&slaveStatus, &timeOutSlave);
+      gFlagTimer.Time_100ms = 0;
+    }
     if(gFlagTimer.Time_1000ms)
     {
 			HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
+      if (allowToSendMapData)
+      { 
+        masterSendMappedData(mappedData);
+      }
       gFlagTimer.Time_1000ms = 0;
     }
     if(gFlagTimer.Time_2s)
@@ -237,7 +249,9 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -246,12 +260,12 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
   }
