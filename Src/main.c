@@ -66,9 +66,14 @@ extern bool isMaster;
 inputBoard_t input;
 outputBoard_t output;
 sensor_t sensor;
-// sensor_t preSensorCheck = {0};
-// outputBoard_t preOutputCheck = {0};
-// inputBoard_t preInputCheck = {0};
+inputBoard_t inputSlave;
+outputBoard_t outputSlave;
+sensor_t sensorSlave;
+
+collectData_t slaveData = {0};
+collectData_t preSlaveData = {0};
+
+
 bool rxInputManual[IN_MAX*2]={0};
 bool rxOutputManual[OUT_MAX*2]={0};
 bool rxRelayManual[RELAY_MAX*2]={0};
@@ -109,7 +114,7 @@ int fputc(int ch, FILE * f) {
   * @brief  The application entry point.
   * @retval int
   */
-int main(void) 
+int main(void)
 {
   /* USER CODE BEGIN 1 */
 
@@ -185,6 +190,14 @@ int main(void)
     if(gFlagTimer.Time_5ms)
     { 
       readAllInput(&sensor, &input, &output);
+        masterSendStatusBoard(sensor, input, output);
+      if (memcmp(&preSlaveData, &slaveData, sizeof(collectData_t)))
+      {
+        memcpy(&sensorSlave, &slaveData, sizeof(sensor_t));
+        memcpy(&inputSlave, (&slaveData + sizeof(sensor_t)), sizeof(inputBoard_t));
+        memcpy(&outputSlave, (&slaveData + sizeof(sensor_t) + sizeof(inputBoard_t)), sizeof(outputBoard_t));
+        memcpy(&preSlaveData, &slaveData, sizeof(collectData_t));
+      }
       gFlagTimer.Time_5ms = 0;
     }
     if(gFlagTimer.Time_10ms)
@@ -214,15 +227,16 @@ int main(void)
     if(gFlagTimer.Time_1000ms)
     {
 			HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
-      if (allowToSendMapData)
+      //if (allowToSendMapData)
       { 
-        masterSendMappedData(mappedData);
+        //masterSendMappedData(mappedData);
       }
       gFlagTimer.Time_1000ms = 0;
     }
     if(gFlagTimer.Time_2s)
     {
-#if KEEP_DEBUG
+// #if KEEP_DEBUG
+#if 0
       memset(&sensor, 0, sizeof(sensor));
       memset(&input, 0, sizeof(input));
       memset(&output, 0, sizeof(output));

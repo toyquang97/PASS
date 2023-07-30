@@ -24,22 +24,31 @@ if manual mode -> salve wil do not send any data to master
 
 // Slave send
 
-#define SIZE_COMMUNICATE    30
-#define START_FRAME_MAPDATA 'S'
-#define END_FRAME_MAPDATA   'Z'
-#define START_FRAME_STATUS  'X'
-#define END_FRAME_STATUS    'V'
-
-
 
 void masterSendMappedData(MAPPING_DATA_t mapData)
 {
-    uint8_t temp = START_FRAME_MAPDATA;
+    uint8_t temp = START_FRAME_COMM;
     HAL_UART_Transmit(&SLAVE_UART, &temp, 1, 10);
-    HAL_UART_Transmit(&SLAVE_UART, (uint8_t*)mapData.IN, sizeof(MAPPING_DATA_t), 1000);
+    temp = STRUCT_MAP_DATA;
+    HAL_UART_Transmit(&SLAVE_UART, &temp, 1, 10);
+    HAL_UART_Transmit(&SLAVE_UART, (uint8_t*)&mapData, sizeof(MAPPING_DATA_t), 1000);
+    temp = END_FRAME_COMM;
+    HAL_UART_Transmit(&SLAVE_UART, &temp, 1, 10);
+}
 
-    temp = END_FRAME_MAPDATA;
+void masterSendStatusBoard(sensor_t pSensor, inputBoard_t pInput, outputBoard_t pOutput)
+{
+    collectData_t masterData = {0};
+    uint8_t temp = START_FRAME_COMM;
     HAL_UART_Transmit(&SLAVE_UART, &temp, 1, 10);
+    temp = STRUCT_STATUS_DATA;
+    HAL_UART_Transmit(&SLAVE_UART, &temp, 1, 10);
+    memcpy(&masterData.slaveSensor, &pSensor, sizeof(sensor_t));
+    memcpy(&masterData.slaveInput, &pInput, sizeof(inputBoard_t));
+    memcpy(&masterData.slaveOutput, &pOutput, sizeof(outputBoard_t));
+    HAL_UART_Transmit(&SLAVE_UART, (uint8_t *)&masterData, sizeof(collectData_t), 1000);
+    // temp = END_FRAME_COMM;
+    // HAL_UART_Transmit(&SLAVE_UART, &temp, 1, 10);
 }
 
 void convertFrameToNumber(void)

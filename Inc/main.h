@@ -42,7 +42,7 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-#define KEEP_DEBUG 0
+#define KEEP_DEBUG 1
 #define HMI_UART huart1
 #define SLAVE_UART huart2
 #define RS232_UART huart3
@@ -175,6 +175,14 @@ typedef struct __SENSOR_
   bool SS7;  
   bool SS8;   
 }sensor_t;
+
+
+typedef struct __COLLECT_DATA_SLAVE
+{
+  sensor_t slaveSensor;
+  inputBoard_t slaveInput;
+  outputBoard_t slaveOutput;
+}collectData_t;
 
 enum __TYPE_
 {

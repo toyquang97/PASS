@@ -3,10 +3,18 @@
 #include "tim.h"
 #include "gpio.h"
 #include <ctype.h>
+#include "communicate.h"
 
 extern inputBoard_t input;
 extern outputBoard_t output;
 extern sensor_t sensor;
+
+extern inputBoard_t inputSlave;
+extern outputBoard_t outputSlave;
+extern sensor_t sensorSlave;
+
+extern collectData_t slaveData;
+
 extern tickTimer gFlagTimer;
 
 extern char rxBufferHMI[MAX_LENGTH];
@@ -21,8 +29,9 @@ uint32_t timeOutSlave = 0;
 uint8_t count = 0;
 uint8_t count1 = 0;
 uint8_t rs232Rx[10];
-char rxDataSlave[6];
 bool rxFirstChar = 0;
+MAPPING_DATA_t rxMappedData = {0};
+uint8_t checkType = HEADER_CHECK;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -62,7 +71,34 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   }
   else if (huart->Instance == huart2.Instance) //Communicate with slave board
   {
-    HAL_UART_Receive_IT(&huart2, rxDataSlave, 1);
+    if (checkType == STRUCT_CHECK)
+    {
+      if (rxDataComm == STRUCT_MAP_DATA)
+      {
+        HAL_UART_Receive_IT(&SLAVE_UART, (uint8_t *)&rxMappedData, sizeof(rxMappedData));
+        checkType = EOF_CHECK;
+      }
+      else if(rxDataComm == STRUCT_STATUS_DATA)
+      {
+        HAL_UART_Receive_IT(&SLAVE_UART, (uint8_t *)&slaveData, sizeof(collectData_t));
+        checkType = EOF_CHECK;
+      }
+      else
+      {
+        checkType = HEADER_CHECK;
+        HAL_UART_Receive_IT(&SLAVE_UART, (uint8_t *)&rxDataComm, 1);
+      }
+    }
+    else
+    {
+      HAL_UART_Receive_IT(&SLAVE_UART, (uint8_t *)&rxDataComm, 1);
+      checkType = HEADER_CHECK;
+    }
+  
+    if (rxDataComm == START_FRAME_COMM)
+    {
+      checkType = STRUCT_CHECK;
+    } 
     timeOutSlave = HAL_GetTick();
   }
   else if (huart->Instance == huart3.Instance) // communaticate with RS232
